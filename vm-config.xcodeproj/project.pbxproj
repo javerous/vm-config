@@ -1,0 +1,472 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E887A83328982FED008C59F2 /* SMVMwareVMX.c in Sources */ = {isa = PBXBuildFile; fileRef = E887A83228982FED008C59F2 /* SMVMwareVMX.c */; };
+		E8ACE2ED289710230081B933 /* SMVMwareNVRAMHelper.c in Sources */ = {isa = PBXBuildFile; fileRef = E8ACE2EC289710230081B933 /* SMVMwareNVRAMHelper.c */; };
+		E8B70ED828985F6200903682 /* SMVMwareVMXHelper.c in Sources */ = {isa = PBXBuildFile; fileRef = E8B70ED728985F6200903682 /* SMVMwareVMXHelper.c */; };
+		E8B70EDD28987ED600903682 /* SMStringHelper.c in Sources */ = {isa = PBXBuildFile; fileRef = E8B70EDC28987ED600903682 /* SMStringHelper.c */; };
+		E8B70EEA2898831500903682 /* SMStringHelperTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8B70EE92898831500903682 /* SMStringHelperTests.m */; };
+		E8B70EEB2898834700903682 /* SMStringHelper.c in Sources */ = {isa = PBXBuildFile; fileRef = E8B70EDC28987ED600903682 /* SMStringHelper.c */; };
+		E8BB3B9F2895A2DE00E57C3A /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = E8BB3B9E2895A2DE00E57C3A /* main.c */; };
+		E8BB3BA72895A31D00E57C3A /* SMVMwareNVRAM.c in Sources */ = {isa = PBXBuildFile; fileRef = E8BB3BA62895A31D00E57C3A /* SMVMwareNVRAM.c */; };
+		E8BB3BAA2895A33200E57C3A /* SMError.c in Sources */ = {isa = PBXBuildFile; fileRef = E8BB3BA92895A33200E57C3A /* SMError.c */; };
+		E8BB3BAD2895DE1100E57C3A /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E8BB3BAC2895DE1100E57C3A /* libiconv.tbd */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E8BB3B992895A2DD00E57C3A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		E887A83128982FED008C59F2 /* SMVMwareVMX.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMVMwareVMX.h; sourceTree = "<group>"; };
+		E887A83228982FED008C59F2 /* SMVMwareVMX.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SMVMwareVMX.c; sourceTree = "<group>"; };
+		E8ACE2EB289710230081B933 /* SMVMwareNVRAMHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMVMwareNVRAMHelper.h; sourceTree = "<group>"; };
+		E8ACE2EC289710230081B933 /* SMVMwareNVRAMHelper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SMVMwareNVRAMHelper.c; sourceTree = "<group>"; };
+		E8B70ED628985F6200903682 /* SMVMwareVMXHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMVMwareVMXHelper.h; sourceTree = "<group>"; };
+		E8B70ED728985F6200903682 /* SMVMwareVMXHelper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SMVMwareVMXHelper.c; sourceTree = "<group>"; };
+		E8B70EDB28987ED600903682 /* SMStringHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMStringHelper.h; sourceTree = "<group>"; };
+		E8B70EDC28987ED600903682 /* SMStringHelper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SMStringHelper.c; sourceTree = "<group>"; };
+		E8B70EE2289882F100903682 /* vm-config-ut.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "vm-config-ut.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8B70EE92898831500903682 /* SMStringHelperTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMStringHelperTests.m; sourceTree = "<group>"; };
+		E8BB3B9B2895A2DD00E57C3A /* vm-config */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "vm-config"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8BB3B9E2895A2DE00E57C3A /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		E8BB3BA52895A31D00E57C3A /* SMVMwareNVRAM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMVMwareNVRAM.h; sourceTree = "<group>"; };
+		E8BB3BA62895A31D00E57C3A /* SMVMwareNVRAM.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SMVMwareNVRAM.c; sourceTree = "<group>"; };
+		E8BB3BA82895A33200E57C3A /* SMError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMError.h; sourceTree = "<group>"; };
+		E8BB3BA92895A33200E57C3A /* SMError.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SMError.c; sourceTree = "<group>"; };
+		E8BB3BAC2895DE1100E57C3A /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E8B70EDF289882F100903682 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8BB3B982895A2DD00E57C3A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8BB3BAD2895DE1100E57C3A /* libiconv.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E81485E928989818008E3B9B /* tools */ = {
+			isa = PBXGroup;
+			children = (
+				E8BB3BA82895A33200E57C3A /* SMError.h */,
+				E8BB3BA92895A33200E57C3A /* SMError.c */,
+				E8B70EDB28987ED600903682 /* SMStringHelper.h */,
+				E8B70EDC28987ED600903682 /* SMStringHelper.c */,
+			);
+			name = tools;
+			sourceTree = "<group>";
+		};
+		E81485EA2898982A008E3B9B /* vmware */ = {
+			isa = PBXGroup;
+			children = (
+				E887A83128982FED008C59F2 /* SMVMwareVMX.h */,
+				E887A83228982FED008C59F2 /* SMVMwareVMX.c */,
+				E8BB3BA52895A31D00E57C3A /* SMVMwareNVRAM.h */,
+				E8BB3BA62895A31D00E57C3A /* SMVMwareNVRAM.c */,
+				E8B70ED628985F6200903682 /* SMVMwareVMXHelper.h */,
+				E8B70ED728985F6200903682 /* SMVMwareVMXHelper.c */,
+				E8ACE2EB289710230081B933 /* SMVMwareNVRAMHelper.h */,
+				E8ACE2EC289710230081B933 /* SMVMwareNVRAMHelper.c */,
+			);
+			name = vmware;
+			sourceTree = "<group>";
+		};
+		E8B70EE3289882F100903682 /* vm-config-ut */ = {
+			isa = PBXGroup;
+			children = (
+				E8B70EE92898831500903682 /* SMStringHelperTests.m */,
+			);
+			path = "vm-config-ut";
+			sourceTree = "<group>";
+		};
+		E8BB3B922895A2DD00E57C3A = {
+			isa = PBXGroup;
+			children = (
+				E8BB3B9D2895A2DE00E57C3A /* vm-config */,
+				E8B70EE3289882F100903682 /* vm-config-ut */,
+				E8BB3B9C2895A2DD00E57C3A /* Products */,
+				E8BB3BAB2895DE1000E57C3A /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		E8BB3B9C2895A2DD00E57C3A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E8BB3B9B2895A2DD00E57C3A /* vm-config */,
+				E8B70EE2289882F100903682 /* vm-config-ut.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E8BB3B9D2895A2DE00E57C3A /* vm-config */ = {
+			isa = PBXGroup;
+			children = (
+				E8BB3B9E2895A2DE00E57C3A /* main.c */,
+				E81485E928989818008E3B9B /* tools */,
+				E81485EA2898982A008E3B9B /* vmware */,
+				E8EECFE92899CECE00642426 /* resources */,
+			);
+			path = "vm-config";
+			sourceTree = "<group>";
+		};
+		E8BB3BAB2895DE1000E57C3A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E8BB3BAC2895DE1100E57C3A /* libiconv.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E8EECFE92899CECE00642426 /* resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E8B70EE1289882F100903682 /* vm-config-ut */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8B70EE6289882F100903682 /* Build configuration list for PBXNativeTarget "vm-config-ut" */;
+			buildPhases = (
+				E8B70EDE289882F100903682 /* Sources */,
+				E8B70EDF289882F100903682 /* Frameworks */,
+				E8B70EE0289882F100903682 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "vm-config-ut";
+			productName = "vm-config-ut";
+			productReference = E8B70EE2289882F100903682 /* vm-config-ut.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		E8BB3B9A2895A2DD00E57C3A /* vm-config */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8BB3BA22895A2DE00E57C3A /* Build configuration list for PBXNativeTarget "vm-config" */;
+			buildPhases = (
+				E8BB3B972895A2DD00E57C3A /* Sources */,
+				E8BB3B982895A2DD00E57C3A /* Frameworks */,
+				E8BB3B992895A2DD00E57C3A /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "vm-config";
+			productName = "vm-config";
+			productReference = E8BB3B9B2895A2DD00E57C3A /* vm-config */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E8BB3B932895A2DD00E57C3A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1400;
+				TargetAttributes = {
+					E8B70EE1289882F100903682 = {
+						CreatedOnToolsVersion = 14.0;
+					};
+					E8BB3B9A2895A2DD00E57C3A = {
+						CreatedOnToolsVersion = 14.0;
+					};
+				};
+			};
+			buildConfigurationList = E8BB3B962895A2DD00E57C3A /* Build configuration list for PBXProject "vm-config" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E8BB3B922895A2DD00E57C3A;
+			productRefGroup = E8BB3B9C2895A2DD00E57C3A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E8BB3B9A2895A2DD00E57C3A /* vm-config */,
+				E8B70EE1289882F100903682 /* vm-config-ut */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E8B70EE0289882F100903682 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E8B70EDE289882F100903682 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8B70EEB2898834700903682 /* SMStringHelper.c in Sources */,
+				E8B70EEA2898831500903682 /* SMStringHelperTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8BB3B972895A2DD00E57C3A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8ACE2ED289710230081B933 /* SMVMwareNVRAMHelper.c in Sources */,
+				E887A83328982FED008C59F2 /* SMVMwareVMX.c in Sources */,
+				E8B70EDD28987ED600903682 /* SMStringHelper.c in Sources */,
+				E8BB3BAA2895A33200E57C3A /* SMError.c in Sources */,
+				E8BB3BA72895A31D00E57C3A /* SMVMwareNVRAM.c in Sources */,
+				E8BB3B9F2895A2DE00E57C3A /* main.c in Sources */,
+				E8B70ED828985F6200903682 /* SMVMwareVMXHelper.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		E8B70EE7289882F100903682 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sourcemac.vm-config-ut";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E8B70EE8289882F100903682 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sourcemac.vm-config-ut";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E8BB3BA02895A2DE00E57C3A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		E8BB3BA12895A2DE00E57C3A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		E8BB3BA32895A2DE00E57C3A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
+				CURRENT_PROJECT_VERSION = 1.0.0;
+				DEVELOPMENT_TEAM = ZLE27JLYK3;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sourcemac.vm-config";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E8BB3BA42895A2DE00E57C3A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
+				CURRENT_PROJECT_VERSION = 1.0.0;
+				DEVELOPMENT_TEAM = ZLE27JLYK3;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sourcemac.vm-config";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E8B70EE6289882F100903682 /* Build configuration list for PBXNativeTarget "vm-config-ut" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8B70EE7289882F100903682 /* Debug */,
+				E8B70EE8289882F100903682 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E8BB3B962895A2DD00E57C3A /* Build configuration list for PBXProject "vm-config" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8BB3BA02895A2DE00E57C3A /* Debug */,
+				E8BB3BA12895A2DE00E57C3A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E8BB3BA22895A2DE00E57C3A /* Build configuration list for PBXNativeTarget "vm-config" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8BB3BA32895A2DE00E57C3A /* Debug */,
+				E8BB3BA42895A2DE00E57C3A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E8BB3B932895A2DD00E57C3A /* Project object */;
+}
