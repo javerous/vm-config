@@ -115,27 +115,24 @@
 #define CSR_ALLOW_EXECUTABLE_POLICY_OVERRIDE    (1 << 10)
 #define CSR_ALLOW_UNAUTHENTICATED_ROOT          (1 << 11)
 
-// > According to "csrutil enable".
-#define CSR_STD_ENABLE_FLAGS					CSR_ALLOW_APPLE_INTERNAL
-
-// > According to "csrutil disable".
-#define CSR_STD_DISABLE_FLAGS					(CSR_ALLOW_UNTRUSTED_KEXTS | CSR_ALLOW_UNRESTRICTED_FS | CSR_ALLOW_UNRESTRICTED_NVRAM | CSR_ALLOW_TASK_FOR_PID | CSR_ALLOW_UNRESTRICTED_DTRACE | CSR_ALLOW_KERNEL_DEBUGGER | CSR_ALLOW_APPLE_INTERNAL)
-
-
 
 /*
 ** Functions
 */
 #pragma mark - Functions
 
+// CSR Get/Set.
 bool SMVMwareNVRAMGetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t *csr, SMError **error);
 bool SMVMwareNVRAMSetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t csr, SMError **error);
 
-bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, bool enable, SMError **error); // Mimate "csrutil enable" / "csrutil disable".
+// CSR Activation.
+bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, const char *macos_version, bool enable, SMError **error); // Mimate "csrutil enable" / "csrutil disable".
 
+// UUID.
 bool SMVMwareNVRAMGetApplePlatformUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError **error);
 bool SMVMwareNVRAMSetApplePlatformUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError **error);
 
 bool SMVMwareNVRAMSetAppleMachineUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError **error);
 
+// Boot Args.
 bool SMVMwareNVRAMSetBootArgs(SMVMwareNVRAM *nvram, const char *boot_args, SMError **error);

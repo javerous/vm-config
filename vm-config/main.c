@@ -26,6 +26,9 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <dirent.h>
+#include <getopt.h>
+#include <errno.h>
+
 #include <uuid/uuid.h>
 
 #include <sys/param.h>
@@ -76,33 +79,37 @@ int main(int argc, const char * argv[])
 {
 	if (argc < 2)
 	{
-		fprintf(stderr, "Usage: %s <action>\n", getprogname());
+		fprintf(stderr, "Usage: %s <verb>\n", getprogname());
 		fprintf(stderr, "\n");
-		fprintf(stderr, "actions:\n");
+		fprintf(stderr, "verbs:\n");
 		fprintf(stderr, "  show [vm.vmwarevm] <content>\n");
-		fprintf(stderr, "    --all                   show all possible content\n");
-		fprintf(stderr, "    --vmx                   show vmx file content\n");
-		fprintf(stderr, "    --nvram                 show nvram file content\n");
-		fprintf(stderr, "    --nvram-efi-variables   show nvram efi variables\n");
+		fprintf(stderr, "    --all                            show all possible content\n");
+		fprintf(stderr, "    --vmx                            show vmx file content\n");
+		fprintf(stderr, "    --nvram                          show nvram file content\n");
+		fprintf(stderr, "    --nvram-efi-variables            show nvram efi variables\n");
+		fprintf(stderr, "    --nvram-efi-variable <name>      show nvram efi the variable with this name\n");
 		fprintf(stderr, "\n");
 		fprintf(stderr, "  change [vm.vmwarevm] <operations>\n");
-		fprintf(stderr, "    --csr-enable             similar to 'csrutil enable'\n");
-		fprintf(stderr, "    --csr-disable            similar to 'csrutil disable'\n");
-		fprintf(stderr, "    --machine-uuid <uuid>    set machine UUID\n");
-		fprintf(stderr, "    --boot-args <string>     set boot arguments\n");
+		fprintf(stderr, "    --boot-args <string>             set boot arguments\n");
+		fprintf(stderr, "    --csr-enable                     similar to 'csrutil enable'\n");
+		fprintf(stderr, "    --csr-enable-version <version>   similar to 'csrutil enable' for a specific macOS version\n");
+		fprintf(stderr, "    --csr-disable                    similar to 'csrutil disable'\n");
+		fprintf(stderr, "    --csr-disable-version <version>  similar to 'csrutil disable' for a specific macOS version\n");
+		fprintf(stderr, "    --csr-flags <flags>              set Configurable Security Restrictions flags\n");
+		fprintf(stderr, "    --machine-uuid <uuid>            set machine UUID\n");
 
 		return 1;
 	}
 	
-	const char *action = argv[1];
+	const char *verb = argv[1];
 	
-	if (strcmp(action, "show") == 0)
+	if (strcmp(verb, "show") == 0)
 		return main_show(argc - 1, argv + 1);
-	else if (strcmp(action, "change") == 0)
+	else if (strcmp(verb, "change") == 0)
 		return main_change(argc - 1, argv + 1);
 	else
 	{
-		fprintf(stderr, "Unknow action '%s'.\n", action);
+		fprintf(stderr, "Unknow verb '%s'.\n", verb);
 		return 1;
 	}
 }
@@ -111,63 +118,112 @@ int main(int argc, const char * argv[])
 
 static int main_show(int argc, const char * argv[])
 {
-	// Check arguments.
+	int 			result = EXIT_SUCCESS;
+
+	SMVMwareVMX		*g_vmx = NULL;
+	SMVMwareNVRAM	*g_nvram = NULL;
+	SMError			*error = NULL;
+	
+	// Check & extract vm path.
+	const char *vm_path;
+	
 	if (argc < 2)
 	{
 		fprintf(stderr, "Error: missing vm path.\n");
 		return EXIT_FAILURE;
 	}
 	
-	const char		*vm_path = argv[1];
-
-	SMVMwareVMX		*g_vmx = NULL;
-	SMVMwareNVRAM	*g_nvram = NULL;
-	SMError			*error = NULL;
+	vm_path = argv[1];
 	
-	int 			result = EXIT_SUCCESS;
+	argc--;
+	argv++;
 	
-	// Handle content.
+	// Handle options.
+	int ch;
+	
 	bool show_vmx = false;
 	bool show_nvram = false;
 	bool show_nvram_efi_variables = false;
+	char *show_nvram_efi_variable = NULL;
 
-	for (size_t i = 2; i < argc;)
+	typedef enum
 	{
-		const char *arg = argv[i];
+		SMMainShowAll,
 		
-		if (strcmp(arg, "--all") == 0)
+		SMMainShowVMX,
+		
+		SMMainShowNVRAM,
+		SMMainShowNVRAMEFIVariables,
+		SMMainShowNVRAMEFIVariable,
+
+	} SMMainShow;
+	
+	static struct option longopts[] = {
+		{ "all",      				no_argument,		NULL,	SMMainShowAll },
+		
+		{ "vmx",					no_argument,		NULL,	SMMainShowVMX },
+		
+		{ "nvram",					no_argument,		NULL,	SMMainShowNVRAM },
+		{ "nvram-efi-variables",	no_argument,		NULL,	SMMainShowNVRAMEFIVariables },
+		{ "nvram-efi-variable",		required_argument,	NULL,	SMMainShowNVRAMEFIVariable },
+
+		{ NULL,         0,                      NULL,           0 }
+	};
+		
+	while ((ch = getopt_long(argc, (char * const *)argv, "", longopts, NULL)) != -1)
+	{
+		switch (ch)
 		{
-			show_vmx = true;
-			show_nvram = true;
-			show_nvram_efi_variables = true;
-			
-			i++;
-		}
-		else if (strcmp(arg, "--vmx") == 0)
-		{
-			show_vmx = true;
-			
-			i++;
-		}
-		else if (strcmp(arg, "--nvram") == 0)
-		{
-			show_nvram = true;
-			show_nvram_efi_variables = true;
-			
-			i++;
-		}
-		else if (strcmp(arg, "--nvram-efi-variables") == 0)
-		{
-			show_nvram_efi_variables = true;
-			
-			i++;
-		}
-		else
-		{
-			fprintf(stderr, "Error: unknown content '%s'.\n", arg);
-			goto fail;
+			case SMMainShowAll:
+			{
+				show_vmx = true;
+				show_nvram = true;
+				show_nvram_efi_variables = true;
+				
+				break;
+			}
+				
+			case SMMainShowVMX:
+			{
+				show_vmx = true;
+				break;
+			}
+				
+			case SMMainShowNVRAM:
+			{
+				show_nvram = true;
+				show_nvram_efi_variables = true;
+				
+				break;
+			}
+				
+			case SMMainShowNVRAMEFIVariables:
+			{
+				show_nvram_efi_variables = true;
+				break;
+			}
+				
+			case SMMainShowNVRAMEFIVariable:
+			{
+				show_nvram_efi_variable = strdup(optarg);
+				break;
+			}
+				
+			default:
+				fprintf(stderr, "Error: invalid option - check usage.\n");
+				goto fail;
 		}
 	}
+	
+	argc -= optind;
+	argv += optind;
+	
+	if (argc != 0)
+	{
+		fprintf(stderr, "Error: invalid extra parameters - check usage.\n");
+		goto fail;
+	}
+	
 	
 	// Print VMX.
 	if (show_vmx)
@@ -230,7 +286,7 @@ static int main_show(int argc, const char * argv[])
 	}
 	
 	// Print NVRAM.
-	if (show_nvram || show_nvram_efi_variables)
+	if (show_nvram || show_nvram_efi_variables || show_nvram_efi_variable)
 	{
 		SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
 		
@@ -261,9 +317,10 @@ static int main_show(int argc, const char * argv[])
 			size_t var_count = SMVMwareNVRAMEntryVariablesCount(entry);
 			
 			// > Show variables.
-			if (show_nvram_efi_variables && var_count > 0)
+			if ((show_nvram_efi_variables || show_nvram_efi_variable) && var_count > 0)
 			{
-				fprintf(stdout, " > Variables: %lu\n", var_count);
+				if (show_nvram_efi_variables)
+					fprintf(stdout, " > Variables: %lu\n", var_count);
 
 				efi_guid_t apple_nvram_variable_guid = Apple_NVRAM_Variable_Guid;
 				efi_guid_t apple_screen_resolution_guid = Apple_Screen_Resolution_Guid;
@@ -281,6 +338,20 @@ static int main_show(int argc, const char * argv[])
 
 					size_t		value_size = 0;
 					const void	*value = SMVMwareNVRAMVariableGetValue(var, &value_size);
+					
+					const char	*utf8_name = SMVMwareNVRAMVariableGetUTF8Name(var, NULL);
+										
+					// > Check if we are interested by this variable.
+					if (!show_nvram_efi_variables && show_nvram_efi_variable)
+					{
+						if (utf8_name)
+						{
+							if (strcmp(utf8_name, show_nvram_efi_variable) != 0)
+								continue;
+						}
+						else
+							continue;
+					}
 
 					// > GUID.
 					efi_guid_t	guid = SMVMwareNVRAMVariableGetGUID(var);
@@ -304,8 +375,6 @@ static int main_show(int argc, const char * argv[])
 					fprintf(stdout, "\n");
 
 					// > UTF-8 name.
-					const char *utf8_name = SMVMwareNVRAMVariableGetUTF8Name(var, NULL);
-
 					if (utf8_name)
 					{
 						bool	valid_utf = true;
@@ -389,9 +458,11 @@ fail:
 	result = EXIT_FAILURE;
 	
 	if (error)
-		fprintf(stderr, "Error: %s.", SMErrorGetUserInfo(error));
+		fprintf(stderr, "Error: %s.\n", SMErrorGetUserInfo(error));
 	
 clean:
+	free(show_nvram_efi_variable);
+	
 	SMErrorFree(error);
 	SMVMwareVMXFree(g_vmx);
 	SMVMwareNVRAMFree(g_nvram);
@@ -403,124 +474,179 @@ clean:
 
 static int main_change(int argc, const char * argv[])
 {
-	// Check arguments.
+	int 			result = EXIT_SUCCESS;
+
+	SMVMwareVMX		*g_vmx = NULL;
+	SMVMwareNVRAM	*g_nvram = NULL;
+	SMError			*error = NULL;
+	
+	char			*vmx_path_tmp_path = NULL;
+	char			*nvram_path_tmp_path = NULL;
+	
+	// Check & extract vm path.
+	const char *vm_path;
+	
 	if (argc < 2)
 	{
 		fprintf(stderr, "Error: missing vm path.\n");
 		return EXIT_FAILURE;
 	}
 	
-	const char		*vm_path = argv[1];
+	vm_path = argv[1];
 	
-	SMVMwareVMX		*g_vmx = NULL;
-	SMVMwareNVRAM	*g_nvram = NULL;
-	SMError			*error = NULL;
-	
-	int 			result = EXIT_SUCCESS;
+	argc--;
+	argv++;
 
-	char			*vmx_path_tmp_path = NULL;
-	char			*nvram_path_tmp_path = NULL;
-	
-	// Handle operations.
-	for (size_t i = 2; i < argc;)
+	// Handle options.
+	int ch;
+
+	typedef enum
 	{
-		const char *arg = argv[i];
+		SMMainChangeBootArgs,
 		
-		if (strcmp(arg, "--csr-enable") == 0)
+		SMMainChangeCSREnable,
+		SMMainChangeCSREnableVersion,
+
+		SMMainChangeCSRDisable,
+		SMMainChangeCSRDisableVersion,
+		
+		SMMainChangeCSRFlags,
+		
+		SMMainChangeCSRMachineUUID,
+	} SMMainChange;
+	
+	static struct option longopts[] = {
+		{ "boot-args",      		required_argument,	NULL,	SMMainChangeBootArgs },
+		
+		{ "csr-enable",				no_argument,		NULL,	SMMainChangeCSREnable },
+		{ "csr-enable-version",		required_argument,	NULL,	SMMainChangeCSREnableVersion },
+		
+		{ "csr-disable",			no_argument,		NULL,	SMMainChangeCSRDisable },
+		{ "csr-disable-version",	required_argument,	NULL,	SMMainChangeCSRDisableVersion },
+		
+		{ "csr-flags",   			required_argument,	NULL,	SMMainChangeCSRFlags },
+		
+		{ "machine-uuid",   		required_argument,	NULL,	SMMainChangeCSRMachineUUID },
+
+		{ NULL,         0,                      NULL,           0 }
+	};
+	
+	while ((ch = getopt_long(argc, (char * const *)argv, "", longopts, NULL)) != -1)
+	{
+		switch (ch)
 		{
-			SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
-			
-			if (!nvram)
-				goto fail;
-				
-			if (!SMVMwareNVRAMSetAppleCSRActivation(nvram, true, &error))
-				goto fail;
-				
-			i++;
-		}
-		else if (strcmp(arg, "--csr-disable") == 0)
-		{
-			SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
-			
-			if (!nvram)
-				goto fail;
-				
-			if (!SMVMwareNVRAMSetAppleCSRActivation(nvram, false, &error))
-				goto fail;
-			
-			i++;
-		}
-		else if (strcmp(arg, "--machine-uuid") == 0)
-		{
-			// > Check arguments.
-			if (i + 1 >= argc)
+			case SMMainChangeBootArgs:
 			{
-				fprintf(stderr, "Error: missing UUID.\n");
-				goto fail;
+				// Change NVRAM.
+				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
+
+				if (!nvram)
+					goto fail;
+
+				if (!SMVMwareNVRAMSetBootArgs(nvram, optarg, &error))
+					goto fail;
+				
+				break;
 			}
-			
-			// > Parse UUID.
-			const char	*uuid_str = argv[++i];
-			uuid_t		uuid;
-			
-			if (uuid_parse(uuid_str, uuid) == -1)
+				
+			case SMMainChangeCSREnable:
+			case SMMainChangeCSREnableVersion:
+			case SMMainChangeCSRDisable:
+			case SMMainChangeCSRDisableVersion:
 			{
-				fprintf(stderr, "Error: invalid UUID '%s'.\n", uuid_str);
-				goto fail;
+				// Change NVRAM.
+				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
+				
+				if (!nvram)
+					goto fail;
+				
+				const char	*version = ((ch == SMMainChangeCSREnable || ch == SMMainChangeCSRDisable) ? NULL : optarg);
+				bool		enable = (ch == SMMainChangeCSREnable || ch == SMMainChangeCSREnableVersion);
+					
+				if (!SMVMwareNVRAMSetAppleCSRActivation(nvram, version, enable, &error))
+					goto fail;
+				
+				break;
 			}
-			
-			// > Change VMX.
-			SMVMwareVMX *vmx = SMGetVMXFromVM(vm_path, &g_vmx, &error);
-			
-			if (!vmx)
-				goto fail;
-			
-			if (!SMVMwareVMXSetMachineUUID(vmx, uuid, &error))
-				goto fail;
-
-			// > Change NVRAM.
-			SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
-			
-			if (!nvram)
-				goto fail;
-			
-			if (!SMVMwareNVRAMSetAppleMachineUUID(nvram, uuid, &error))
-				goto fail;
-			
-			// > Next argument.
-			++i;
-		}
-		else if (strcmp(arg, "--boot-args") == 0)
-		{
-			// > Check arguments.
-			if (i + 1 >= argc)
+				
+			case SMMainChangeCSRFlags:
 			{
-				fprintf(stderr, "Error: missing boot arguments string.\n");
-				goto fail;
+				errno = 0;
+				
+				// Parse integer. Why those libc functions have to be so... chaotic bad...
+				// I think I handled all errors possible from what I understand of the man page, but who know.
+				char				*endp = NULL;
+				unsigned long long	result = strtoull(optarg, &endp, 16);
+				uint32_t 			new_csr = 0;
+				
+				if ((*optarg == 0) || !endp || *endp != 0 || ((result == ULONG_MAX || result == 0) && errno != 0) || result > UINT32_MAX)
+				{
+					fprintf(stderr, "Error: invalid value '%s'.\n", optarg);
+					goto fail;
+				}
+				
+				new_csr = (uint32_t)result;
+				
+				// Change NVRAM.
+				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
+				
+				if (!nvram)
+					goto fail;
+					
+				if (!SMVMwareNVRAMSetAppleCSRActiveConfig(nvram, new_csr, &error))
+					goto fail;
+				
+				break;
 			}
+				
+			case SMMainChangeCSRMachineUUID:
+			{
+				// Parse UUID.
+				const char	*uuid_str = optarg;
+				uuid_t		uuid;
+				
+				if (uuid_parse(uuid_str, uuid) == -1)
+				{
+					fprintf(stderr, "Error: invalid UUID '%s'.\n", uuid_str);
+					goto fail;
+				}
+				
+				// Change VMX.
+				SMVMwareVMX *vmx = SMGetVMXFromVM(vm_path, &g_vmx, &error);
+				
+				if (!vmx)
+					goto fail;
+				
+				if (!SMVMwareVMXSetMachineUUID(vmx, uuid, &error))
+					goto fail;
 
-			// > Extract string.
-			const char	*boot_args = argv[++i];
-
-			// > Change NVRAM.
-			SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
-
-			if (!nvram)
+				// Change NVRAM.
+				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
+				
+				if (!nvram)
+					goto fail;
+				
+				if (!SMVMwareNVRAMSetAppleMachineUUID(nvram, uuid, &error))
+					goto fail;
+				
+				break;
+			}
+				
+			default:
+				fprintf(stderr, "Error: invalid option - check usage.\n");
 				goto fail;
-
-			if (!SMVMwareNVRAMSetBootArgs(nvram, boot_args, &error))
-				goto fail;
-
-			// > Next argument.
-			++i;
-		}
-		else
-		{
-			fprintf(stderr, "Error: unknown operation '%s'.\n", arg);
-			goto fail;
 		}
 	}
 	
+	argc -= optind;
+	argv += optind;
+	
+	if (argc != 0)
+	{
+		fprintf(stderr, "Error: invalid extra parameters - check usage.\n");
+		goto fail;
+	}
+
 	// Write files.
 	const char	*vmx_path = NULL;
 	const char	*nvram_path = NULL;
@@ -569,13 +695,13 @@ static int main_change(int argc, const char * argv[])
 	// > Stage files.
 	if (vmx_path && vmx_path_tmp_path && rename(vmx_path_tmp_path, vmx_path) == -1)
 	{
-		fprintf(stderr, "Error: failed to replace vmx file ('%s' -> '%s').", vmx_path_tmp_path, vmx_path);
+		fprintf(stderr, "Error: failed to replace vmx file ('%s' -> '%s').\n", vmx_path_tmp_path, vmx_path);
 		goto fail;
 	}
 	
 	if (nvram_path && nvram_path_tmp_path && rename(nvram_path_tmp_path, nvram_path) == -1)
 	{
-		fprintf(stderr, "Error: failed to replace nvram file ('%s' -> '%s').", nvram_path_tmp_path, nvram_path);
+		fprintf(stderr, "Error: failed to replace nvram file ('%s' -> '%s').\n", nvram_path_tmp_path, nvram_path);
 		goto fail;
 	}
 	
@@ -588,7 +714,7 @@ fail:
 	result = EXIT_FAILURE;
 	
 	if (error)
-		fprintf(stderr, "Error: %s.", SMErrorGetUserInfo(error));
+		fprintf(stderr, "Error: %s.\n", SMErrorGetUserInfo(error));
 	
 clean:
 	SMErrorFree(error);

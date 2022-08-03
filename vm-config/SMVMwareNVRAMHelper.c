@@ -21,8 +21,11 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 
 #include "SMVMwareNVRAMHelper.h"
+
+#include "SMVersionHelper.h"
 
 
 /*
@@ -39,16 +42,25 @@ static const efi_guid_t g_dhcpv6_service_binding_guid	= DHCPv6_Service_Binding_G
 */
 #pragma mark - Prototypes
 
+// CSR Activation.
+static uint32_t csr_version_1(bool enable, uint32_t current_csr);
+static uint32_t csr_version_2(bool enable, uint32_t current_csr);
+static uint32_t csr_version_3(bool enable, uint32_t current_csr);
+static uint32_t csr_version_4(bool enable, uint32_t current_csr);
+
+
+
+// Helpers.
 static SMVMwareNVRAMEntry * 		SMVMwareNVRAMVariablesEntry(SMVMwareNVRAM *nvram, SMError **error);
 static SMVMwareNVRAMEFIVariable *	SMVMwareNVRAMVariableForGUIDAndName(SMVMwareNVRAM *nvram, const efi_guid_t *guid, const char *name, SMError **error);
 
 
 /*
-** Functions
+** Interface
 */
-#pragma mark - Functions
+#pragma mark - Interface
 
-#pragma mark Interface
+#pragma mark CSR Get/Set
 
 bool SMVMwareNVRAMGetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t *csr, SMError **error)
 {
@@ -92,8 +104,72 @@ bool SMVMwareNVRAMSetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t csr, SM
 	return true;
 }
 
-bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, bool enable, SMError **error)
+
+#pragma mark CSR Activation
+
+#pragma mark > Interface
+
+bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, const char *macos_version_str, bool enable, SMError **error)
 {
+	// Get csr enable / disable logic according to macOS versions.
+	uint32_t (*csr_getter)(bool enable, uint32_t current_csr) = csr_version_4;
+
+	if (macos_version_str)
+	{
+		struct {
+			SMVersion min_version;
+			SMVersion max_version;
+			
+			uint32_t (*csr_getter)(bool enable, uint32_t current_csr);
+			
+		} versions_flags[] = {
+			{
+				.min_version = SMVersionFromComponents(10, 11, 0),
+				.max_version = SMVersionFromComponents(10, 12, 99),
+				.csr_getter = csr_version_1
+			},
+			{
+				.min_version = SMVersionFromComponents(10, 13, 0),
+				.max_version = SMVersionFromComponents(10, 13, 99),
+				.csr_getter = csr_version_2
+			},
+			{
+				.min_version = SMVersionFromComponents(10, 14, 0),
+				.max_version = SMVersionFromComponents(10, 15, 99),
+				.csr_getter = csr_version_3
+			},
+			{
+				.min_version = SMVersionFromComponents(11, 0, 0),
+				.max_version = SMVersionFromComponents(13, 99, 99),
+				.csr_getter = csr_version_4
+			},
+		};
+		
+		SMVersion macos_version = SMVersionFromString(macos_version_str, error);
+		
+		if (SMVersionIsEqual(macos_version, SMVersionInvalid))
+			return false;
+		
+		bool csr_found = false;
+		
+		for (size_t i = 0; i < sizeof(versions_flags) / sizeof(versions_flags[0]); i++)
+		{
+			if (SMVersionIsGreaterOrEqual(macos_version, versions_flags[i].min_version) && SMVersionIsLessOrEqual(macos_version, versions_flags[i].max_version))
+			{
+				csr_getter = versions_flags[i].csr_getter;
+				csr_found = true;
+				break;
+			}
+		}
+		
+		if (!csr_found)
+		{
+			SMSetErrorPtr(error, SMVMwareNVRAMErrorDomain, -1, "can't found csr enable / disable logic for macOS version %s", macos_version_str);
+			return false;
+		}
+	}
+	
+	// Fetch or create new entry.
 	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarCSRActiveConfigName, error);
 
 	if (!var)
@@ -112,6 +188,7 @@ bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, bool enable, SMErr
 			return false;
 	}
 	
+	// Fetch & check current value.
 	size_t		csr_size = 0;
 	const void	*csr_bytes = SMVMwareNVRAMVariableGetValue(var, &csr_size);
 	
@@ -121,18 +198,69 @@ bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, bool enable, SMErr
 		return false;
 	}
 	
+	// Update value according to activation.
 	const uint32_t	*csr_ptr = csr_bytes;
-	uint32_t		csr = *csr_ptr;
-	
-	if (enable)
-		csr &= ~CSR_STD_DISABLE_FLAGS | CSR_STD_ENABLE_FLAGS;
-	else
-		csr |= CSR_STD_DISABLE_FLAGS;
+	uint32_t		csr = csr_getter(enable, *csr_ptr);
 	
 	SMVMwareNVRAMVariableSetValue(var, &csr, sizeof(csr));
 	
+	// Return.
 	return true;
 }
+
+
+#pragma mark > Helpers
+
+static uint32_t csr_version_1(bool enable, uint32_t current_csr)
+{
+	return (enable ? 0x10 : 0x77);
+}
+
+static uint32_t csr_version_2(bool enable, uint32_t current_csr)
+{
+	if (enable)
+		return ((0x200 & current_csr) | 0x10);
+	else
+		return ((0x200 & current_csr) | 0x77);
+}
+
+static uint32_t csr_version_3(bool enable, uint32_t current_csr)
+{
+	if (enable)
+		return ((0x600 & current_csr) | 0x10);
+	else
+		return ((0x600 & current_csr) | 0x77);
+}
+
+static uint32_t csr_version_4(bool enable, uint32_t current_csr)
+{
+	if (enable)
+	{
+		current_csr &= ~CSR_ALLOW_UNTRUSTED_KEXTS;
+		current_csr &= ~CSR_ALLOW_UNRESTRICTED_FS;
+		current_csr &= ~CSR_ALLOW_UNRESTRICTED_NVRAM;
+		current_csr &= ~CSR_ALLOW_TASK_FOR_PID;
+		current_csr &= ~CSR_ALLOW_UNRESTRICTED_DTRACE;
+		current_csr &= ~CSR_ALLOW_KERNEL_DEBUGGER;
+		current_csr |= CSR_ALLOW_APPLE_INTERNAL;
+		current_csr &= ~CSR_ALLOW_UNAUTHENTICATED_ROOT;
+	}
+	else
+	{
+		current_csr |= CSR_ALLOW_UNTRUSTED_KEXTS;
+		current_csr |= CSR_ALLOW_UNRESTRICTED_FS;
+		current_csr |= CSR_ALLOW_UNRESTRICTED_NVRAM;
+		current_csr |= CSR_ALLOW_TASK_FOR_PID;
+		current_csr |= CSR_ALLOW_UNRESTRICTED_DTRACE;
+		current_csr |= CSR_ALLOW_KERNEL_DEBUGGER;
+		current_csr |= CSR_ALLOW_APPLE_INTERNAL;
+	}
+	
+	return current_csr;
+}
+
+
+#pragma mark UUID
 
 bool SMVMwareNVRAMGetApplePlatformUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError **error)
 {
@@ -201,6 +329,9 @@ bool SMVMwareNVRAMSetAppleMachineUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError
 	return true;
 }
 
+
+#pragma mark Boot Args
+
 bool SMVMwareNVRAMSetBootArgs(SMVMwareNVRAM *nvram, const char *boot_args, SMError **error)
 {
 	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarBootArgsName, error);
@@ -223,6 +354,9 @@ bool SMVMwareNVRAMSetBootArgs(SMVMwareNVRAM *nvram, const char *boot_args, SMErr
 }
 
 
+/*
+** Helpers
+*/
 #pragma mark Helpers
 
 static SMVMwareNVRAMEntry * SMVMwareNVRAMVariablesEntry(SMVMwareNVRAM *nvram, SMError **error)
