@@ -44,3 +44,23 @@ vm-config is a command line to show or change some VMware Fusion virtual machine
   ```
   vm-config show my_vm.vmwarevm --all
   ```
+  
+- Show only vmx content
+  ```
+  vm-config show my_vm.vmwarevm --vmx
+  ```
+
+- Show only nvram content
+  ```
+  vm-config show my_vm.vmwarevm --nvram
+  ```
+
+- Show only nvram EFI variable entries
+  ```
+  vm-config show my_vm.vmwarevm --nvram-efi-variables
+  ```
+
+- Show only a specific nvram EFI variable entry
+  ```
+  vm-config show my_vm.vmwarevm --nvram-efi-variable csr-active-config
+  ```
