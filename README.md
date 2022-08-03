@@ -24,7 +24,7 @@ vm-config change /path/to/my_vm.vmwarevm --boot-args 'debug=0x144'
 ```
 - Change multiple configurations at the same time
 ```
-vm-config change /path/to/my_vm.vmwarevm --csr-disable --boot-args 'debug=0x144'
+vm-config change /path/to/my_vm.vmwarevm --csr-disable --boot-args 'amfi_get_out_of_my_way=0x1'
 ```
 
 
