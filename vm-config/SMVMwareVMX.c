@@ -259,7 +259,7 @@ fail:
 
 static void SMVMwareVMXAddEntry(SMVMwareVMX *vmx, SMVMwareVMXEntry *entry)
 {
-	vmx->entries = realloc(vmx->entries, (vmx->entries_cnt + 1) * sizeof(*vmx->entries));
+	vmx->entries = reallocf(vmx->entries, (vmx->entries_cnt + 1) * sizeof(*vmx->entries));
 	
 	assert(vmx->entries);
 	

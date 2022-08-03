@@ -295,12 +295,12 @@ SMVMwareNVRAM * SMVMwareNVRAMCreate(const char *nvram_file_path, SMError **error
 	// > Forge flags.
 	int	flags = MAP_PRIVATE | MAP_FILE;
 
-#if  defined(MAP_RESILIENT_MEDIA)
+#if defined(MAP_RESILIENT_MEDIA)
 	flags |= MAP_RESILIENT_MEDIA;
 #endif
 
 	// > Map.
-	void	*mbytes = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE | MAP_FILE, fd, 0);
+	void	*mbytes = mmap(NULL, st.st_size, PROT_READ, flags, fd, 0);
 	int		err = errno;
 	
 	close(fd);
@@ -437,7 +437,7 @@ fail:
 
 static void SMVMwareNVRAMAddEntry(SMVMwareNVRAM *nvram, SMVMwareNVRAMEntry *entry)
 {
-	nvram->entries = realloc(nvram->entries, (nvram->entries_cnt + 1) * sizeof(*nvram->entries));
+	nvram->entries = reallocf(nvram->entries, (nvram->entries_cnt + 1) * sizeof(*nvram->entries));
 	
 	assert(nvram->entries);
 	
@@ -788,7 +788,7 @@ SMVMwareNVRAMEFIVariable * SMVMwareNVRAMEntryAddVariable(SMVMwareNVRAMEntry *ent
 static void SMVMwareNVRAMEntryAddVariableInternal(SMVMwareNVRAMEntry *entry, SMVMwareNVRAMEFIVariable *var)
 {
 	// Append to array.
-	entry->vars = realloc(entry->vars, (entry->vars_cnt + 1) * sizeof(*entry->vars));
+	entry->vars = reallocf(entry->vars, (entry->vars_cnt + 1) * sizeof(*entry->vars));
 	
 	assert(entry->vars);
 	
@@ -1279,7 +1279,9 @@ static off_t SMWriteBytes(SMBytesWritter *writter, const void *bytes, size_t siz
 {
 	off_t result = writter->size;
 	
-	writter->bytes = realloc(writter->bytes, writter->size + size);
+	writter->bytes = reallocf(writter->bytes, writter->size + size);
+	assert(writter->bytes);
+	
 	memcpy(writter->bytes + writter->size, bytes, size);
 
 	writter->size += size;
@@ -1291,9 +1293,11 @@ static off_t SMWriteAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, si
 {
 	off_t result = writter->size;
 
-	writter->bytes = realloc(writter->bytes, writter->size + count);
+	writter->bytes = reallocf(writter->bytes, writter->size + count);
+	assert(writter->bytes);
+
 	memset(writter->bytes + writter->size, (int)byte, count);
-	
+
 	writter->size += count;
 	
 	return result;
@@ -1304,8 +1308,10 @@ static off_t SMWriteAppendSpace(SMBytesWritter *writter, size_t size)
 	off_t result = writter->size;
 
 	writter->size += size;
-	writter->bytes = realloc(writter->bytes, writter->size);
 	
+	writter->bytes = realloc(writter->bytes, writter->size);
+	assert(writter->bytes);
+
 	return result;
 }
 
