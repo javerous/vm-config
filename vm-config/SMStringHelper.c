@@ -103,7 +103,7 @@ char * SMStringReplaceString(char *str, const char *value, const char *replaceme
 	if (result_buff_len < result_len + Size)		\
 	{												\
 		result_buff_len = result_len + Size + 10;	\
-		result = realloc(result, result_buff_len);	\
+		result = reallocf(result, result_buff_len);	\
 													\
 		if (!result)								\
 			return NULL;							\
