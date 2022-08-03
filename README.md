@@ -4,7 +4,7 @@ vm-config
 vm-config is a command line to show or change some VMware Fusion virtual machine configurations.
 
 
-For example, to change configurations:
+#### Example of commands to change configuration
 
 - Enable SIP, like `csrutil enable`
 ```
@@ -28,7 +28,7 @@ vm-config change /path/to/my_vm.vmwarevm --csr-disable --boot-args 'amfi_get_out
 ```
 
 
-And to show configurations:
+#### Example of commands to show configuration
 
 - Show all (vmx content and nvram content)
 ```
