@@ -16,7 +16,7 @@ vm-config is a command line to show or change some VMware Fusion virtual machine
   vm-config change my_vm.vmwarevm --csr-disable
   ```
 
-- Disable SIP, with a specific macOS version flavor
+- Disable SIP, like `csrutil disable`, but with a specific macOS version flavor
 
   ```
   vm-config change my_vm.vmwarevm --csr-disable-version 11.0.0
