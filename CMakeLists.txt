@@ -6,8 +6,9 @@ project(vm-config)
 # Set sources.
 set(SOURCE_FILE vm-config/main.c
 				vm-config/SMError.c
+				vm-config/SMVersion.c
 				vm-config/SMStringHelper.c
-				vm-config/SMVersionHelper.c
+				vm-config/SMBytesWritter.c
 				vm-config/SMVMwareVMXHelper.c
 				vm-config/SMVMwareNVRAM.c
 				vm-config/SMVMwareNVRAMHelper.c

@@ -40,6 +40,8 @@
 
 #include "SMVMwareNVRAM.h"
 
+#include "SMBytesWritter.h"
+
 
 /*
 ** Defines
@@ -55,12 +57,6 @@
 																																		\
 	if (__smerror)																														\
 		*__smerror = SMErrorCreate(SMVMwareNVRAMErrorDomain, 42, "parsing error @0x%lu - " UserInfo, (__parse_bytes - __start_bytes), ##__VA_ARGS__);	\
-})
-
-#define SMWriterBytes(Type, Writter, Offset) ({ 	\
-	Type * __value = (Writter)->bytes + (Offset);	\
-													\
-	__value;										\
 })
 
 // Round up or down. Round should be a power of 2.
@@ -156,13 +152,6 @@ struct SMVMwareNVRAMEFIVariable
 	size_t		updated_value_size;
 };
 
-// Bytes.
-typedef struct
-{
-	void 	*bytes;
-	size_t	size;
-} SMBytesWritter;
-
 // File.
 typedef struct
 {
@@ -231,11 +220,6 @@ static bool SMFileWriteBytes(int fd, const void *bytes, size_t len, SMError **er
 // > Read.
 static bool SMReadBytes(SMVMwareNVRAM *nvram, const void **bytes, size_t *size, void *output, size_t output_size, SMError **error);
 static bool SMReadMatchingBytes(SMVMwareNVRAM *nvram, const void **bytes, size_t *size, const void *match_bytes, size_t match_size, SMError **error);
-
-// > Write.
-static off_t SMWriteBytes(SMBytesWritter *writter, const void *bytes, size_t size);
-static off_t SMWriteAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, size_t count);
-static off_t SMWriteAppendSpace(SMBytesWritter *writter, size_t size);
 
 // > Misc.
 static bool			SMIsBufferAscii(const uint8_t *buffer, size_t size, const char *ascii);
@@ -616,11 +600,11 @@ static const void * SMVMwareNVRAMEntryGetSerializedBytes(SMVMwareNVRAMEntry *ent
 	}
 	
 	// Serialize bytes & return them.
-	SMBytesWritter writter = { 0 };
+	SMBytesWritter writter = SMBytesWritterInit();
 	
 	// > Write header.
 	off_t 			nvram_entry_offset = SMWriteAppendSpace(&writter, sizeof(nvram_entry_t));
-	nvram_entry_t	*hdr = SMWriterBytes(nvram_entry_t, &writter, nvram_entry_offset);
+	nvram_entry_t	*hdr = SMBytesWritterPtrOff(nvram_entry_t, &writter, nvram_entry_offset);
 	
 	memcpy(hdr->name, entry->name, sizeof(hdr->name));
 	memcpy(hdr->subname, entry->subname, sizeof(hdr->subname));
@@ -637,7 +621,7 @@ static const void * SMVMwareNVRAMEntryGetSerializedBytes(SMVMwareNVRAMEntry *ent
 		// > Write magic.
 		uint8_t magic[] = SMEFINVMagic;
 		
-		SMWriteBytes(&writter, magic, sizeof(magic));
+		SMWriteAppendBytes(&writter, magic, sizeof(magic));
 		
 		// > Write zero.
 		SMWriteAppendRepeatedByte(&writter, 0, 4);
@@ -653,7 +637,7 @@ static const void * SMVMwareNVRAMEntryGetSerializedBytes(SMVMwareNVRAMEntry *ent
 			size_t 		var_size = 0;
 			const void	*var_bytes = SMVMwareNVRAMVariableGetSerializedBytes(variable, &var_size);
 			
-			SMWriteBytes(&writter, var_bytes, var_size);
+			SMWriteAppendBytes(&writter, var_bytes, var_size);
 			
 			data_size += var_size;
 		}
@@ -661,7 +645,7 @@ static const void * SMVMwareNVRAMEntryGetSerializedBytes(SMVMwareNVRAMEntry *ent
 		data_size += sizeof(magic) + 4 + 4; // magic + sizeof(zero) + sizeof(data_size).
 		
 		// > Compute & update content size. XXX: I'm not sure if 0x40000 is a maxium, or a "block" size. Consider it's a block size for now.
-		nvram_entry_t *update_hdr = SMWriterBytes(nvram_entry_t, &writter, nvram_entry_offset);
+		nvram_entry_t *update_hdr = SMBytesWritterPtrOff(nvram_entry_t, &writter, nvram_entry_offset);
 
 		content_size = SMRoundUp(data_size, 0x40000);
 		update_hdr->len = (uint32_t)content_size;
@@ -669,7 +653,7 @@ static const void * SMVMwareNVRAMEntryGetSerializedBytes(SMVMwareNVRAMEntry *ent
 		SMWriteAppendRepeatedByte(&writter, 0xff, content_size - data_size);
 		
 		// > Update data size.
-		uint32_t *data_size_ptr = SMWriterBytes(uint32_t, &writter, data_size_offset);
+		uint32_t *data_size_ptr = SMBytesWritterPtrOff(uint32_t, &writter, data_size_offset);
 		
 		*data_size_ptr = (uint32_t)data_size;
 	}
@@ -946,7 +930,7 @@ static const void *	SMVMwareNVRAMVariableGetSerializedBytes(SMVMwareNVRAMEFIVari
 	
 	// > Header.
 	off_t 		efi_var_offset = SMWriteAppendSpace(&writter, sizeof(efi_var_t));
-	efi_var_t	*efi_var = SMWriterBytes(efi_var_t, &writter, efi_var_offset);
+	efi_var_t	*efi_var = SMBytesWritterPtrOff(efi_var_t, &writter, efi_var_offset);
 	
 	memcpy(&efi_var->guid, &variable->guid, sizeof(efi_guid_t));
 	efi_var->attributes = variable->attributes;
@@ -954,8 +938,8 @@ static const void *	SMVMwareNVRAMVariableGetSerializedBytes(SMVMwareNVRAMEFIVari
 	efi_var->name_size = (uint32_t)name_size;
 	
 	// > Content.
-	SMWriteBytes(&writter, name_bytes, name_size);
-	SMWriteBytes(&writter, value_bytes, value_size);
+	SMWriteAppendBytes(&writter, name_bytes, name_size);
+	SMWriteAppendBytes(&writter, value_bytes, value_size);
 
 	// > Hold result.
 	variable->serialized_bytes = writter.bytes;
@@ -1270,49 +1254,6 @@ static bool SMReadMatchingBytes(SMVMwareNVRAM *nvram, const void **bytes, size_t
 	
 	// Success.
 	return true;
-}
-
-
-#pragma mark > Write
-
-static off_t SMWriteBytes(SMBytesWritter *writter, const void *bytes, size_t size)
-{
-	off_t result = writter->size;
-	
-	writter->bytes = reallocf(writter->bytes, writter->size + size);
-	assert(writter->bytes);
-	
-	memcpy(writter->bytes + writter->size, bytes, size);
-
-	writter->size += size;
-	
-	return result;
-}
-
-static off_t SMWriteAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, size_t count)
-{
-	off_t result = writter->size;
-
-	writter->bytes = reallocf(writter->bytes, writter->size + count);
-	assert(writter->bytes);
-
-	memset(writter->bytes + writter->size, (int)byte, count);
-
-	writter->size += count;
-	
-	return result;
-}
-
-static off_t SMWriteAppendSpace(SMBytesWritter *writter, size_t size)
-{
-	off_t result = writter->size;
-
-	writter->size += size;
-	
-	writter->bytes = realloc(writter->bytes, writter->size);
-	assert(writter->bytes);
-
-	return result;
 }
 
 

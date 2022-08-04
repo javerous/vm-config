@@ -554,16 +554,45 @@ static int main_change(int argc, const char * argv[])
 			case SMMainChangeCSRDisable:
 			case SMMainChangeCSRDisableVersion:
 			{
-				// Change NVRAM.
+				SMVersion macos_version = SMVersionInvalid;
+
+				// Parse version.
+				if (ch == SMMainChangeCSREnableVersion || ch == SMMainChangeCSRDisableVersion)
+				{
+					macos_version = SMVersionFromString(optarg, &error);
+
+					if (SMVersionIsEqual(macos_version, SMVersionInvalid))
+						goto fail;
+				}
+
+				// Try to extract version from VMX.
+				else if (ch == SMMainChangeCSREnable || ch == SMMainChangeCSRDisable)
+				{
+					// Get VMX.
+					SMVMwareVMX *vmx = SMGetVMXFromVM(vm_path, &g_vmx, &error);
+
+					if (!vmx)
+						goto fail;
+
+					// Extract macOS version.
+					macos_version = SMVMwareVMXExtractMacOSVersion(vmx);
+
+					if (SMVersionIsEqual(macos_version, SMVersionInvalid))
+						fprintf(stderr, "Warning: can't detected macosVersion - use acceptable csr default behavior.\n");
+					else
+						fprintf(stderr, "Info: macOS version %d.%d.%d detected - use this version for csr behavior.\n", macos_version.major_version, macos_version.minor_version, macos_version.patch_version);
+				}
+
+				// Get NVRAM.
 				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
 				
 				if (!nvram)
 					goto fail;
-				
-				const char	*version = ((ch == SMMainChangeCSREnable || ch == SMMainChangeCSRDisable) ? NULL : optarg);
-				bool		enable = (ch == SMMainChangeCSREnable || ch == SMMainChangeCSREnableVersion);
+
+				// Change NVRAM.
+				bool enable = (ch == SMMainChangeCSREnable || ch == SMMainChangeCSREnableVersion);
 					
-				if (!SMVMwareNVRAMSetAppleCSRActivation(nvram, version, enable, &error))
+				if (!SMVMwareNVRAMSetAppleCSRActivation(nvram, macos_version, enable, &error))
 					goto fail;
 				
 				break;

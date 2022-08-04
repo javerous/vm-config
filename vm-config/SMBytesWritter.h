@@ -1,5 +1,5 @@
 /*
- *  SMVMwareVMXHelper.h
+ *  SMBytesWritter.h
  *
  *  Copyright 2022 Avérous Julien-Pierre
  *
@@ -22,15 +22,8 @@
 
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
 
-#include <uuid/uuid.h>
-
-#include "SMVMwareVMX.h"
-
-#include "SMError.h"
-#include "SMVersion.h"
+#include <stdlib.h>
 
 
 /*
@@ -38,15 +31,17 @@
 */
 #pragma mark - Defines
 
-#define SMVMwareVMXNVRAMFileKey				"nvram"
+#define SMBytesWritterInit() { 0 }
 
-#define SMVMwareVMXUUIDBiosKey				"uuid.bios"
-#define SMVMwareVMXUUIDLocationKey			"uuid.location"
+#define SMBytesWritterPtrOff(Type, Writter, Offset) ({	\
+	Type * __value = (Writter)->bytes + (Offset);		\
+														\
+	__value;											\
+})
 
-#define SMVMwareVMXGuestOSKey				"guestOS"
-#define SMVMwareVMXGuestOSDetailedDataKey	"guestOS.detailed.data"
-
-#define SMVMwareVMXGuestInfoDetailedDataKey "guestInfo.detailed.data"
+#define SMBytesWritterPtr(Writter)	({ (Writter)->bytes; })
+#define SMBytesWritterSize(Writter)	({ (Writter)->size; })
+#define SMBytesWritterFree(Writter)	({ free((Writter)->bytes); })
 
 
 /*
@@ -54,11 +49,13 @@
 */
 #pragma mark - Types
 
-typedef struct SMDetailedField
+typedef struct SMBytesWritter
 {
-	char *key;
-	char *value;
-} SMDetailedField;
+	void	*bytes;
+	size_t	bytes_size;
+
+	size_t	size;
+} SMBytesWritter;
 
 
 /*
@@ -66,11 +63,7 @@ typedef struct SMDetailedField
 */
 #pragma mark - Functions
 
-// Machine UUID.
-bool SMVMwareVMXSetMachineUUID(SMVMwareVMX *vmx, uuid_t uuid, SMError **error);
-
-// Version.
-SMVersion SMVMwareVMXExtractMacOSVersion(SMVMwareVMX *vmx);
-
-// Helpers.
-SMDetailedField * SMDetailedFieldsFromString(const char *detailed_data);
+off_t SMWriteAppendBytes(SMBytesWritter *writter, const void *bytes, size_t size);
+off_t SMWriteAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, size_t count);
+off_t SMWriteAppendByte(SMBytesWritter *writter, uint8_t byte);
+off_t SMWriteAppendSpace(SMBytesWritter *writter, size_t size);

@@ -1,5 +1,5 @@
 /*
- *  SMVersionHelper.h
+ *  SMVersion.h
  *
  *  Copyright 2022 Avérous Julien-Pierre
  *
@@ -31,6 +31,8 @@
 ** Defines
 */
 #pragma mark - Defines
+
+#define SMVersionFromComponents(MajorVersion, MinorVersion, PatchVersion) (SMVersion){ .major_version = (MajorVersion), .minor_version = (MinorVersion), .patch_version = (PatchVersion) }
 
 #define SMVersionIsGreaterOrEqual(V1, V2) ({							\
 	SMVersion __v1 = (V1);												\
@@ -71,9 +73,8 @@ extern const char * SMVersionErrorDomain;
 */
 #pragma mark - Function
 
-// Parse.
+// Instance.
 SMVersion SMVersionFromString(const char *version_str, SMError **error);
-SMVersion SMVersionFromComponents(unsigned major_version, unsigned minor_version, unsigned patch_version);
 
 // Compare.
 bool SMVersionIsGreater(SMVersion v1, SMVersion v2);	// True if v1 > v2.

@@ -31,6 +31,8 @@
 
 #include "SMError.h"
 
+#include "SMVersion.h"
+
 
 /*
 ** Defines
@@ -126,7 +128,7 @@ bool SMVMwareNVRAMGetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t *csr, S
 bool SMVMwareNVRAMSetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t csr, SMError **error);
 
 // CSR Activation.
-bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, const char *macos_version, bool enable, SMError **error); // Mimate "csrutil enable" / "csrutil disable".
+bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, SMVersion macos_version, bool enable, SMError **error); // Mimate "csrutil enable" / "csrutil disable".
 
 // UUID.
 bool SMVMwareNVRAMGetApplePlatformUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError **error);

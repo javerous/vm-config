@@ -25,6 +25,8 @@
 
 #include "SMStringHelper.h"
 
+#include "SMBytesWritter.h"
+
 
 /*
 ** Functionss
@@ -99,24 +101,11 @@ char * SMStringTrimCharacter(char *str, const char *chars, size_t chars_cnt, boo
 
 char * SMStringReplaceString(char *str, const char *value, const char *replacement, bool free_str)
 {
-#define append_size(Size) ({						\
-	if (result_buff_len < result_len + Size)		\
-	{												\
-		result_buff_len = result_len + Size + 10;	\
-		result = reallocf(result, result_buff_len);	\
-													\
-		if (!result)								\
-			return NULL;							\
-	}												\
-})
-	
+	SMBytesWritter writter = SMBytesWritterInit();
+
 	// Compute lens.
 	char *str_bck = str;
-	
-	char 	*result = NULL;
-	size_t	result_len = 0;
-	size_t 	result_buff_len = 0;
-	
+
 	size_t	str_len = strlen(str);
 	size_t	value_len = strlen(value);
 	size_t	replacement_len = strlen(replacement);
@@ -124,7 +113,7 @@ char * SMStringReplaceString(char *str, const char *value, const char *replaceme
 	// Fast path.
 	if (value_len == 0 || str_len < value_len)
 	{
-		result = strdup(str);
+		char *result = strdup(str);
 		
 		if (free_str)
 			free(str);
@@ -137,36 +126,29 @@ char * SMStringReplaceString(char *str, const char *value, const char *replaceme
 	{
 		if (str_len >= value_len && memcmp(str, value, value_len) == 0)
 		{
-			append_size(replacement_len);
-			memcpy(result + result_len, replacement, replacement_len);
+			SMWriteAppendBytes(&writter, replacement, replacement_len);
 			
 			str += value_len;
 			str_len -= value_len;
-			
-			result_len += replacement_len;
 		}
 		else
 		{
-			append_size(1);
-			result[result_len] = *str;
-			
+			SMWriteAppendByte(&writter, *str);
+
 			str += 1;
 			str_len -= 1;
-			
-			result_len += 1;
 		}
 	}
 	
 	// Terminal zero.
-	append_size(1);
-	result[result_len] = 0;
-	
+	SMWriteAppendByte(&writter, 0);
+
 	// Free.
 	if (free_str)
 		free(str_bck);
 	
 	// Result.
-	return result;
+	return SMBytesWritterPtr(&writter);
 }
 
 
