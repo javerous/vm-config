@@ -205,6 +205,7 @@ static int main_show(int argc, const char * argv[])
 				
 			case SMMainShowNVRAMEFIVariable:
 			{
+				free(show_nvram_efi_variable);
 				show_nvram_efi_variable = strdup(optarg);
 				break;
 			}
