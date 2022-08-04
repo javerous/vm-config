@@ -34,6 +34,7 @@
 #pragma mark - Globals
 
 static const efi_guid_t g_apple_nvram_variable_guid		= Apple_NVRAM_Variable_Guid;
+static const efi_guid_t g_apple_screen_resolution_guid	= Apple_Screen_Resolution_Guid;
 static const efi_guid_t g_dhcpv6_service_binding_guid	= DHCPv6_Service_Binding_Guid;
 
 
@@ -59,6 +60,29 @@ static SMVMwareNVRAMEFIVariable *	SMVMwareNVRAMVariableForGUIDAndName(SMVMwareNV
 ** Interface
 */
 #pragma mark - Interface
+
+#pragma mark Boot Args
+
+bool SMVMwareNVRAMSetBootArgs(SMVMwareNVRAM *nvram, const char *boot_args, SMError **error)
+{
+	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarBootArgsName, error);
+
+	if (var)
+		SMVMwareNVRAMVariableSetValue(var, boot_args, strlen(boot_args) + 1);
+	else
+	{
+		SMVMwareNVRAMEntry *entry = SMVMwareNVRAMVariablesEntry(nvram, error);
+
+		if (!entry)
+			return false;
+
+		uint32_t attributes = EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
+
+		return (SMVMwareNVRAMEntryAddVariable(entry, g_apple_nvram_variable_guid, attributes, SMEFIAppleNVRAMVarBootArgsName, boot_args, strlen(boot_args) + 1, error) != NULL);
+	}
+
+	return true;
+}
 
 #pragma mark CSR Get/Set
 
@@ -325,30 +349,6 @@ bool SMVMwareNVRAMSetAppleMachineUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError
 }
 
 
-#pragma mark Boot Args
-
-bool SMVMwareNVRAMSetBootArgs(SMVMwareNVRAM *nvram, const char *boot_args, SMError **error)
-{
-	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarBootArgsName, error);
-
-	if (var)
-		SMVMwareNVRAMVariableSetValue(var, boot_args, strlen(boot_args) + 1);
-	else
-	{
-		SMVMwareNVRAMEntry *entry = SMVMwareNVRAMVariablesEntry(nvram, error);
-
-		if (!entry)
-			return false;
-
-		uint32_t attributes = EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
-
-		return (SMVMwareNVRAMEntryAddVariable(entry, g_apple_nvram_variable_guid, attributes, SMEFIAppleNVRAMVarBootArgsName, boot_args, strlen(boot_args) + 1, error) != NULL);
-	}
-
-	return true;
-}
-
-
 /*
 ** Helpers
 */
@@ -404,4 +404,50 @@ static SMVMwareNVRAMEFIVariable * SMVMwareNVRAMVariableForGUIDAndName(SMVMwareNV
 	SMSetErrorPtr(error, SMVMwareNVRAMErrorDomain, -1, "variable '%s' not found", name);
 	
 	return NULL;
+}
+
+
+#pragma mark Screen Resolution
+
+bool SMVMwareNVRAMSetScreenResolution(SMVMwareNVRAM *nvram, uint32_t width, uint32_t height, SMError **error)
+{
+	SMVMwareNVRAMEntry	*entry = NULL;
+	uint32_t			attributes = EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
+
+	SMVMwareNVRAMEFIVariable *width_var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_screen_resolution_guid, SMEFIVarAppleScreenResolutionWidthName, error);
+	SMVMwareNVRAMEFIVariable *height_var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_screen_resolution_guid, SMEFIVarAppleScreenResolutionHeightName, error);
+
+	if (width_var)
+		SMVMwareNVRAMVariableSetValue(width_var, &width, sizeof(width));
+	else
+	{
+		if (!entry)
+		{
+			entry = SMVMwareNVRAMVariablesEntry(nvram, error);
+			
+			if (!entry)
+				return false;
+		}
+
+		if (SMVMwareNVRAMEntryAddVariable(entry, g_apple_screen_resolution_guid, attributes, SMEFIVarAppleScreenResolutionWidthName, &width, sizeof(width), error) == NULL)
+			return false;
+	}
+	
+	if (height_var)
+		SMVMwareNVRAMVariableSetValue(height_var, &height, sizeof(height));
+	else
+	{
+		if (!entry)
+		{
+			entry = SMVMwareNVRAMVariablesEntry(nvram, error);
+			
+			if (!entry)
+				return false;
+		}
+		
+		if (SMVMwareNVRAMEntryAddVariable(entry, g_apple_screen_resolution_guid, attributes, SMEFIVarAppleScreenResolutionHeightName, &height, sizeof(height), error) == NULL)
+			return false;
+	}
+
+	return true;
 }
