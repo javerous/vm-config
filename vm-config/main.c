@@ -105,7 +105,7 @@ int main(int argc, const char * argv[])
 	const char *verb = argv[1];
 	
 	if (strcmp(verb, "show") == 0)
-		return main_show(argc - 1, argv + 1);
+		return main_show(argc - 1, argv + 1);
 	else if (strcmp(verb, "change") == 0)
 		return main_change(argc - 1, argv + 1);
 	else
