@@ -71,7 +71,7 @@
 #define SMEFIAppleNVRAMVarCSRActiveConfigName					"csr-active-config"					// uint32_t flags.
 #define SMEFIAppleNVRAMVarEOSFDRCacheUUIDName					"eos-fdr-cache-uuid"				// String (UUID).
 #define SMEFIAppleNVRAMVarEOSRestoreFailureUUIDsName			"eos-restore-failure-uuids"			// String (UUID).
-#define SMEFIAppleNVRAMVarFMMComputerName						"fmm-computer-name"					// String (computer name).
+#define SMEFIAppleNVRAMVarFMMComputerName						"fmm-computer-name"					// String (Find My Mac Computer Name).
 #define SMEFIAppleNVRAMVarGPUPolicyName							"gpu-policy"						// uint8_t ?
 #define SMEFIAppleNVRAMVarKDPIPStrName							"_kdp_ipstr"						// String.
 #define SMEFIAppleNVRAMVarMultiAdapaterStateName				"multiupdater-state"				// Bytes (opaque).
@@ -85,7 +85,7 @@
 #define SMEFIAppleNVRAMVarPrevLangName  						"prev-lang:kbd"						// String (ISO 639-1 ? e.g. "en-GB:1").
 	
 #define SMEFIAppleNVRAMVarBluetoothActiveControllerInfoName		"bluetoothActiveControllerInfo"		// Bytes (opaque).
-#define SMEFIAppleNVRAMVarBluetoothExternalDongleFailedName		"bluetoothExternalDongleFailed" 	// uint8_t (boolean) ?
+#define SMEFIAppleNVRAMVarBluetoothExternalDongleFailedName		"bluetoothExternalDongleFailed" 	// uint8_t (boolean ?).
 #define SMEFIAppleNVRAMVarBluetoothInternalControllerInfoName	"bluetoothInternalControllerInfo"	// Bytes (opaque).
 #define SMEFIAppleNVRAMVarLocationServicesEnabledName			"LocationServicesEnabled"			// uint8_t (boolean ?)
 #define SMEFIAppleNVRAMVarPanicInfoLogName						"AAPL,PanicInfoLog"					// Bytes (opaque)
