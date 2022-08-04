@@ -102,14 +102,7 @@
 		E81485EA2898982A008E3B9B /* vmware */ = {
 			isa = PBXGroup;
 			children = (
-				E887A83128982FED008C59F2 /* SMVMwareVMX.h */,
-				E887A83228982FED008C59F2 /* SMVMwareVMX.c */,
-				E8BB3BA52895A31D00E57C3A /* SMVMwareNVRAM.h */,
-				E8BB3BA62895A31D00E57C3A /* SMVMwareNVRAM.c */,
-				E8B70ED628985F6200903682 /* SMVMwareVMXHelper.h */,
-				E8B70ED728985F6200903682 /* SMVMwareVMXHelper.c */,
-				E8ACE2EB289710230081B933 /* SMVMwareNVRAMHelper.h */,
-				E8ACE2EC289710230081B933 /* SMVMwareNVRAMHelper.c */,
+				E8EEAB88289C6EAE0012C596 /* vmx */,
 			);
 			name = vmware;
 			sourceTree = "<group>";
@@ -173,6 +166,29 @@
 				E8BB3BAC2895DE1100E57C3A /* libiconv.tbd */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E8EEAB88289C6EAE0012C596 /* vmx */ = {
+			isa = PBXGroup;
+			children = (
+				E887A83128982FED008C59F2 /* SMVMwareVMX.h */,
+				E887A83228982FED008C59F2 /* SMVMwareVMX.c */,
+				E8B70ED628985F6200903682 /* SMVMwareVMXHelper.h */,
+				E8B70ED728985F6200903682 /* SMVMwareVMXHelper.c */,
+				E8EEAB89289C6EC10012C596 /* nvram */,
+			);
+			name = vmx;
+			sourceTree = "<group>";
+		};
+		E8EEAB89289C6EC10012C596 /* nvram */ = {
+			isa = PBXGroup;
+			children = (
+				E8BB3BA52895A31D00E57C3A /* SMVMwareNVRAM.h */,
+				E8BB3BA62895A31D00E57C3A /* SMVMwareNVRAM.c */,
+				E8ACE2EB289710230081B933 /* SMVMwareNVRAMHelper.h */,
+				E8ACE2EC289710230081B933 /* SMVMwareNVRAMHelper.c */,
+			);
+			name = nvram;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
