@@ -123,6 +123,9 @@
 */
 #pragma mark - Functions
 
+// Boot Args.
+bool SMVMwareNVRAMSetBootArgs(SMVMwareNVRAM *nvram, const char *boot_args, SMError **error);
+
 // CSR Get/Set.
 bool SMVMwareNVRAMGetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t *csr, SMError **error);
 bool SMVMwareNVRAMSetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t csr, SMError **error);
@@ -136,5 +139,5 @@ bool SMVMwareNVRAMSetApplePlatformUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMErro
 
 bool SMVMwareNVRAMSetAppleMachineUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError **error);
 
-// Boot Args.
-bool SMVMwareNVRAMSetBootArgs(SMVMwareNVRAM *nvram, const char *boot_args, SMError **error);
+// Screen Resolution.
+bool SMVMwareNVRAMSetScreenResolution(SMVMwareNVRAM *nvram, uint32_t width, uint32_t height, SMError **error);

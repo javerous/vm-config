@@ -97,6 +97,7 @@ int main(int argc, const char * argv[])
 		fprintf(stderr, "    --csr-disable-version <version>  similar to 'csrutil disable' for a specific macOS version\n");
 		fprintf(stderr, "    --csr-flags <flags>              set Configurable Security Restrictions flags\n");
 		fprintf(stderr, "    --machine-uuid <uuid>            set machine UUID\n");
+		fprintf(stderr, "    --screen-resolution <WxH>        set screen resolution, width x height, i.e. '1920x1080'\n");
 
 		return 1;
 	}
@@ -155,7 +156,6 @@ static int main_show(int argc, const char * argv[])
 		SMMainShowNVRAM,
 		SMMainShowNVRAMEFIVariables,
 		SMMainShowNVRAMEFIVariable,
-
 	} SMMainShow;
 	
 	static struct option longopts[] = {
@@ -513,7 +513,9 @@ static int main_change(int argc, const char * argv[])
 		
 		SMMainChangeCSRFlags,
 		
-		SMMainChangeCSRMachineUUID,
+		SMMainChangeMachineUUID,
+		
+		SMMainChangeScreenResolution,
 	} SMMainChange;
 	
 	static struct option longopts[] = {
@@ -527,7 +529,9 @@ static int main_change(int argc, const char * argv[])
 		
 		{ "csr-flags",   			required_argument,	NULL,	SMMainChangeCSRFlags },
 		
-		{ "machine-uuid",   		required_argument,	NULL,	SMMainChangeCSRMachineUUID },
+		{ "machine-uuid",   		required_argument,	NULL,	SMMainChangeMachineUUID },
+		
+		{ "screen-resolution",   	required_argument,	NULL,	SMMainChangeScreenResolution },
 
 		{ NULL,         0,                      NULL,           0 }
 	};
@@ -629,7 +633,7 @@ static int main_change(int argc, const char * argv[])
 				break;
 			}
 				
-			case SMMainChangeCSRMachineUUID:
+			case SMMainChangeMachineUUID:
 			{
 				// Parse UUID.
 				const char	*uuid_str = optarg;
@@ -657,6 +661,47 @@ static int main_change(int argc, const char * argv[])
 					goto fail;
 				
 				if (!SMVMwareNVRAMSetAppleMachineUUID(nvram, uuid, &error))
+					goto fail;
+				
+				break;
+			}
+				
+			case SMMainChangeScreenResolution:
+			{
+				// Parse argument.
+				unsigned int	width = 0, height = 0;
+				size_t			optarg_len = strlen(optarg);
+				int				scan_len = 0;
+				int				sresult = sscanf(optarg, "%ux%u%n", &width, &height, &scan_len);
+				
+				if (sresult != 2 || scan_len != optarg_len)
+				{
+					fprintf(stderr, "Error: invalid screen resolution - check usage.\n");
+					goto fail;
+				}
+				
+				// Apply some arbitrary constraints, something which doesn't look too crazy or risky.
+				// This software is open-source, anyone can change them if they don't agree...
+				// Anyway, VMware Fusion (or macOS ?) fix them if they are not valid.
+				if (width < 100 || width > 50000)
+				{
+					fprintf(stderr, "Error: width should be in the range of [100;50000].\n");
+					goto fail;
+				}
+				
+				if (height < 100 || height > 50000)
+				{
+					fprintf(stderr, "Error: height should be in the range of [100;50000].\n");
+					goto fail;
+				}
+				
+				// Change NVRAM.
+				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
+				
+				if (!nvram)
+					goto fail;
+				
+				if (!SMVMwareNVRAMSetScreenResolution(nvram, width, height, &error))
 					goto fail;
 				
 				break;
