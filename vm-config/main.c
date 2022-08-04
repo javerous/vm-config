@@ -97,7 +97,7 @@ int main(int argc, const char * argv[])
 		fprintf(stderr, "    --csr-disable-version <version>  similar to 'csrutil disable' for a specific macOS version\n");
 		fprintf(stderr, "    --csr-flags <flags>              set Configurable Security Restrictions flags\n");
 		fprintf(stderr, "    --machine-uuid <uuid>            set machine UUID\n");
-		fprintf(stderr, "    --screen-resolution <WxH>        set screen resolution, width x height, i.e. '1920x1080'\n");
+		fprintf(stderr, "    --screen-resolution <WxH>        set screen resolution, width x height, e.g. '1920x1080'\n");
 
 		return 1;
 	}
@@ -105,7 +105,7 @@ int main(int argc, const char * argv[])
 	const char *verb = argv[1];
 	
 	if (strcmp(verb, "show") == 0)
-		return main_show(argc - 1, argv + 1);
+		return main_show(argc - 1, argv + 1);
 	else if (strcmp(verb, "change") == 0)
 		return main_change(argc - 1, argv + 1);
 	else
