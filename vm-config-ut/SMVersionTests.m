@@ -1,5 +1,5 @@
 /*
- *  SMVersionHelperTests.m
+ *  SMVersionTests.m
  *
  *  Copyright 2022 Avérous Julien-Pierre
  *
@@ -22,19 +22,19 @@
 
 #import <XCTest/XCTest.h>
 
-#import "SMVersionHelper.h"
+#import "SMVersion.h"
 
 
 /*
-** SMVersionHelperTests
+** SMVersionTests
 */
-#pragma mark - SMVersionHelperTests
+#pragma mark - SMVersionTests
 
-@interface SMVersionHelperTests : XCTestCase
+@interface SMVersionTests : XCTestCase
 
 @end
 
-@implementation SMVersionHelperTests
+@implementation SMVersionTests
 
 - (void)testCreateFromComponents
 {

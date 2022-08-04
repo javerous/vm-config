@@ -359,7 +359,9 @@ static SMVMwareVMXEntry * SMVMwareVMXEntryCreateFromLine(const char *line, size_
 
 		result->original_key = key;
 		
-		// > Handle value (XXX we don't validate that the value is well delimited with " - do we care ? we are not a pendantic validator...).
+		// > Handle value.
+		// > XXX We don't validate that the value is well delimited with " Do we care ? We are not a pedantic validator...).
+		// >     But it probably needs a more robust parsing anyway.
 		char value_trim[] = { ' ', '\t', '"' };
 		char *value = SMStringTrimCharacter((char *)line + 1, value_trim, sizeof(value_trim), false);
 		

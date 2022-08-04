@@ -25,7 +25,7 @@
 
 #include "SMVMwareNVRAMHelper.h"
 
-#include "SMVersionHelper.h"
+#include "SMVersion.h"
 
 
 /*
@@ -109,47 +109,42 @@ bool SMVMwareNVRAMSetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t csr, SM
 
 #pragma mark > Interface
 
-bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, const char *macos_version_str, bool enable, SMError **error)
+bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, SMVersion macos_version, bool enable, SMError **error)
 {
 	// Get csr enable / disable logic according to macOS versions.
+	static struct {
+		SMVersion min_version;
+		SMVersion max_version;
+
+		uint32_t (*csr_getter)(bool enable, uint32_t current_csr);
+
+	} versions_flags[] = {
+		{
+			.min_version = SMVersionFromComponents(10, 11, 0),
+			.max_version = SMVersionFromComponents(10, 12, 99),
+			.csr_getter = csr_version_1
+		},
+		{
+			.min_version = SMVersionFromComponents(10, 13, 0),
+			.max_version = SMVersionFromComponents(10, 13, 99),
+			.csr_getter = csr_version_2
+		},
+		{
+			.min_version = SMVersionFromComponents(10, 14, 0),
+			.max_version = SMVersionFromComponents(10, 15, 99),
+			.csr_getter = csr_version_3
+		},
+		{
+			.min_version = SMVersionFromComponents(10, 16, 0),
+			.max_version = SMVersionFromComponents(13, 99, 99),
+			.csr_getter = csr_version_4
+		},
+	};
+
 	uint32_t (*csr_getter)(bool enable, uint32_t current_csr) = csr_version_4;
 
-	if (macos_version_str)
+	if (!SMVersionIsEqual(macos_version, SMVersionInvalid))
 	{
-		struct {
-			SMVersion min_version;
-			SMVersion max_version;
-			
-			uint32_t (*csr_getter)(bool enable, uint32_t current_csr);
-			
-		} versions_flags[] = {
-			{
-				.min_version = SMVersionFromComponents(10, 11, 0),
-				.max_version = SMVersionFromComponents(10, 12, 99),
-				.csr_getter = csr_version_1
-			},
-			{
-				.min_version = SMVersionFromComponents(10, 13, 0),
-				.max_version = SMVersionFromComponents(10, 13, 99),
-				.csr_getter = csr_version_2
-			},
-			{
-				.min_version = SMVersionFromComponents(10, 14, 0),
-				.max_version = SMVersionFromComponents(10, 15, 99),
-				.csr_getter = csr_version_3
-			},
-			{
-				.min_version = SMVersionFromComponents(11, 0, 0),
-				.max_version = SMVersionFromComponents(13, 99, 99),
-				.csr_getter = csr_version_4
-			},
-		};
-		
-		SMVersion macos_version = SMVersionFromString(macos_version_str, error);
-		
-		if (SMVersionIsEqual(macos_version, SMVersionInvalid))
-			return false;
-		
 		bool csr_found = false;
 		
 		for (size_t i = 0; i < sizeof(versions_flags) / sizeof(versions_flags[0]); i++)
@@ -164,7 +159,7 @@ bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, const char *macos_
 		
 		if (!csr_found)
 		{
-			SMSetErrorPtr(error, SMVMwareNVRAMErrorDomain, -1, "can't found csr enable / disable logic for macOS version %s", macos_version_str);
+			SMSetErrorPtr(error, SMVMwareNVRAMErrorDomain, -1, "can't find csr enable / disable logic for macOS version %d.%d.%d", macos_version.major_version, macos_version.minor_version, macos_version.patch_version);
 			return false;
 		}
 	}

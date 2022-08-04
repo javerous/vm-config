@@ -1,5 +1,5 @@
 /*
- *  SMVersionHelper.c
+ *  SMVersion.c
  *
  *  Copyright 2022 Avérous Julien-Pierre
  *
@@ -22,7 +22,7 @@
 
 #include <ctype.h>
 
-#include "SMVersionHelper.h"
+#include "SMVersion.h"
 
 
 /*
@@ -40,7 +40,7 @@ const char * SMVersionErrorDomain = "com.sourcemac.version";
 */
 #pragma mark - Interface
 
-#pragma mark Parse
+#pragma mark Instance
 
 SMVersion SMVersionFromString(const char *version_str, SMError **error)
 {
@@ -105,12 +105,6 @@ SMVersion SMVersionFromString(const char *version_str, SMError **error)
 	// Result.
 	return SMVersionFromComponents(major, minor, patch);
 }
-
-SMVersion SMVersionFromComponents(unsigned major_version, unsigned minor_version, unsigned patch_version)
-{
-	return (SMVersion){ .major_version = major_version, .minor_version = minor_version, .patch_version = patch_version };
-}
-
 
 #pragma mark Compare
 
