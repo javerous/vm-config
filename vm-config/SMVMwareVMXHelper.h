@@ -73,4 +73,5 @@ bool SMVMwareVMXSetMachineUUID(SMVMwareVMX *vmx, uuid_t uuid, SMError **error);
 SMVersion SMVMwareVMXExtractMacOSVersion(SMVMwareVMX *vmx);
 
 // Helpers.
-SMDetailedField * SMDetailedFieldsFromString(const char *detailed_data);
+SMDetailedField *	SMDetailedFieldsFromString(const char *detailed_data);
+void				SMDetailedFieldsFree(SMDetailedField *fields);

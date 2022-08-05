@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "SMStringHelper.h"
 
@@ -38,6 +39,8 @@
 char * SMStringDuplicate(const void *str, size_t len)
 {
 	char *result = malloc(len + 1);
+	
+	assert(result);
 	
 	memcpy(result, str, len);
 	result[len] = 0;
@@ -87,8 +90,7 @@ char * SMStringTrimCharacter(char *str, const char *chars, size_t chars_cnt, boo
 	size_t	flen = (end - str) + 1;
 	char	*result = malloc(flen + 1);
 	
-	if (!result)
-		return NULL;
+	assert(result);
 	
 	memcpy(result, str, flen);
 	result[flen] = 0;
@@ -126,14 +128,14 @@ char * SMStringReplaceString(char *str, const char *value, const char *replaceme
 	{
 		if (str_len >= value_len && memcmp(str, value, value_len) == 0)
 		{
-			SMWriteAppendBytes(&writter, replacement, replacement_len);
+			SMBytesWritterAppendBytes(&writter, replacement, replacement_len);
 			
 			str += value_len;
 			str_len -= value_len;
 		}
 		else
 		{
-			SMWriteAppendByte(&writter, *str);
+			SMBytesWritterAppendByte(&writter, *str);
 
 			str += 1;
 			str_len -= 1;
@@ -141,7 +143,7 @@ char * SMStringReplaceString(char *str, const char *value, const char *replaceme
 	}
 	
 	// Terminal zero.
-	SMWriteAppendByte(&writter, 0);
+	SMBytesWritterAppendByte(&writter, 0);
 
 	// Free.
 	if (free_str)
@@ -163,23 +165,17 @@ char * SMStringPathAppendComponent(const char *path, const char *component)
 	if (comp_len == 0)
 		return strdup(path);
 	
-	// Allocate result.
-	size_t	result_max_len = path_len + 1 + comp_len + 1;
-	char	*result = malloc(result_max_len);
-	size_t	i = 0;
-	
-	*result = 0;
+	// Writter.
+	SMBytesWritter writter = SMBytesWritterInit();
 	
 	// Copy paths.
 	while (path_len != 0 && path[path_len - 1] == '/')
 		path_len--;
 	
-	memcpy(result + i, path, path_len);
-	i += path_len;
+	SMBytesWritterAppendBytes(&writter, path, path_len);
 	
 	// Add intermediate '/'.
-	result[i] = '/';
-	i++;
+	SMBytesWritterAppendByte(&writter, '/');
 	
 	// Add components.
 	while (*component && *component == '/')
@@ -188,14 +184,13 @@ char * SMStringPathAppendComponent(const char *path, const char *component)
 		comp_len--;
 	}
 	
-	memcpy(result + i, component, comp_len);
-	i += comp_len;
-	
+	SMBytesWritterAppendBytes(&writter, component, comp_len);
+
 	// Terminal zero.
-	result[i] = 0;
-	
+	SMBytesWritterAppendByte(&writter, 0);
+
 	// Result.
-	return result;
+	return SMBytesWritterPtr(&writter);
 }
 
 bool SMStringPathHasExtension(const char *path, const char *ext)

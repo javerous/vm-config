@@ -134,20 +134,6 @@
 
 #pragma mark - Helpers
 
-- (void)freeDetailedFields:(SMDetailedField *)fields
-{
-	for (size_t i = 0; ; i++)
-	{
-		if (!fields[i].key || !fields[i].value)
-			break;
-	
-		free(fields[i].key);
-		free(fields[i].value);
-	}
-	
-	free(fields);
-}
-
 - (NSDictionary *)dictionaryFromFields:(SMDetailedField *)fields freeFields:(BOOL)freeFields
 {
 	if (!fields)
@@ -164,7 +150,7 @@
 	}
 	
 	if (freeFields)
-		[self freeDetailedFields:fields];
+		SMDetailedFieldsFree(fields);
 	
 	return result;
 }

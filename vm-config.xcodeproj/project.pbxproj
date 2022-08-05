@@ -18,6 +18,7 @@
 		E8A23992289AF1D30076A869 /* SMVersion.c in Sources */ = {isa = PBXBuildFile; fileRef = E8A23990289AF1D30076A869 /* SMVersion.c */; };
 		E8A23994289AF8850076A869 /* SMVersionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8A23993289AF8850076A869 /* SMVersionTests.m */; };
 		E8A23995289AFAD10076A869 /* SMError.c in Sources */ = {isa = PBXBuildFile; fileRef = E8BB3BA92895A33200E57C3A /* SMError.c */; };
+		E8A37483289D45C700FA3EDA /* SMErrorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8A37482289D45C700FA3EDA /* SMErrorTests.m */; };
 		E8ACE2ED289710230081B933 /* SMVMwareNVRAMHelper.c in Sources */ = {isa = PBXBuildFile; fileRef = E8ACE2EC289710230081B933 /* SMVMwareNVRAMHelper.c */; };
 		E8B70ED828985F6200903682 /* SMVMwareVMXHelper.c in Sources */ = {isa = PBXBuildFile; fileRef = E8B70ED728985F6200903682 /* SMVMwareVMXHelper.c */; };
 		E8B70EDD28987ED600903682 /* SMStringHelper.c in Sources */ = {isa = PBXBuildFile; fileRef = E8B70EDC28987ED600903682 /* SMStringHelper.c */; };
@@ -52,6 +53,7 @@
 		E8A2398F289AF1D30076A869 /* SMVersion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMVersion.h; sourceTree = "<group>"; };
 		E8A23990289AF1D30076A869 /* SMVersion.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SMVersion.c; sourceTree = "<group>"; };
 		E8A23993289AF8850076A869 /* SMVersionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMVersionTests.m; sourceTree = "<group>"; };
+		E8A37482289D45C700FA3EDA /* SMErrorTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMErrorTests.m; sourceTree = "<group>"; };
 		E8ACE2EB289710230081B933 /* SMVMwareNVRAMHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMVMwareNVRAMHelper.h; sourceTree = "<group>"; };
 		E8ACE2EC289710230081B933 /* SMVMwareNVRAMHelper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SMVMwareNVRAMHelper.c; sourceTree = "<group>"; };
 		E8B70ED628985F6200903682 /* SMVMwareVMXHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMVMwareVMXHelper.h; sourceTree = "<group>"; };
@@ -121,9 +123,10 @@
 		E8B70EE3289882F100903682 /* vm-config-ut */ = {
 			isa = PBXGroup;
 			children = (
-				E8A23993289AF8850076A869 /* SMVersionTests.m */,
-				E8B70EE92898831500903682 /* SMStringHelperTests.m */,
 				E8296BF7289C319F0006DDDB /* SMBytesWritterTests.m */,
+				E8A37482289D45C700FA3EDA /* SMErrorTests.m */,
+				E8B70EE92898831500903682 /* SMStringHelperTests.m */,
+				E8A23993289AF8850076A869 /* SMVersionTests.m */,
 				E8296BF5289C31530006DDDB /* SMVMwareVMXTests.m */,
 			);
 			path = "vm-config-ut";
@@ -279,6 +282,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8A37483289D45C700FA3EDA /* SMErrorTests.m in Sources */,
 				E8B70EEB2898834700903682 /* SMStringHelper.c in Sources */,
 				E8518031289C42B400B78B58 /* SMVMwareVMX.c in Sources */,
 				E8B70EEA2898831500903682 /* SMStringHelperTests.m in Sources */,
@@ -465,10 +469,15 @@
 				CURRENT_PROJECT_VERSION = 1.0.3;
 				DEVELOPMENT_TEAM = ZLE27JLYK3;
 				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sourcemac.vm-config";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WARNING_CFLAGS = (
+					"-Wno-error=#warnings",
+					"$(inherited)",
+				);
 			};
 			name = Debug;
 		};
@@ -481,6 +490,7 @@
 				CURRENT_PROJECT_VERSION = 1.0.3;
 				DEVELOPMENT_TEAM = ZLE27JLYK3;
 				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sourcemac.vm-config";

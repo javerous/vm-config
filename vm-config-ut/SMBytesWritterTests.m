@@ -54,37 +54,37 @@
 	memset(rbytes, 0xff, sizeof(rbytes));
 
 	//
-	off = SMWriteAppendBytes(&writer, bytes1, sizeof(bytes1));
+	off = SMBytesWritterAppendBytes(&writer, bytes1, sizeof(bytes1));
 	[ref appendBytes:bytes1 length:sizeof(bytes1)];
 	
 	XCTAssertEqual(off, ref.length - sizeof(bytes1));
 	
 	//
-	off = SMWriteAppendBytes(&writer, bytes2, sizeof(bytes2));
+	off = SMBytesWritterAppendBytes(&writer, bytes2, sizeof(bytes2));
 	[ref appendBytes:bytes2 length:sizeof(bytes2)];
 	
 	XCTAssertEqual(off, ref.length - sizeof(bytes2));
 
 	//
-	off = SMWriteAppendByte(&writer, byte1);
+	off = SMBytesWritterAppendByte(&writer, byte1);
 	[ref appendBytes:&byte1 length:sizeof(byte1)];
 	
 	XCTAssertEqual(off, ref.length - sizeof(byte1));
 
 	//
-	off = SMWriteAppendByte(&writer, byte2);
+	off = SMBytesWritterAppendByte(&writer, byte2);
 	[ref appendBytes:&byte2 length:sizeof(byte2)];
 	
 	XCTAssertEqual(off, ref.length - sizeof(byte2));
 
 	//
-	off = SMWriteAppendRepeatedByte(&writer, *rbytes, sizeof(rbytes));
+	off = SMBytesWritterAppendRepeatedByte(&writer, *rbytes, sizeof(rbytes));
 	[ref appendBytes:rbytes length:sizeof(rbytes)];
 	
 	XCTAssertEqual(off, ref.length - sizeof(rbytes));
 
 	//
-	off = SMWriteAppendByte(&writer, byte1);
+	off = SMBytesWritterAppendByte(&writer, byte1);
 	[ref appendBytes:&byte1 length:sizeof(byte1)];
 	
 	XCTAssertEqual(off, ref.length - sizeof(byte1));

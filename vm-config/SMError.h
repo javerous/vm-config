@@ -59,5 +59,8 @@ void		SMErrorFree(SMError *error);
 
 // Properties.
 const char *	SMErrorGetDomain(SMError *error);
+
 int				SMErrorGetCode(SMError *error);
+
 const char *	SMErrorGetUserInfo(SMError *error);
+const char *	SMErrorGetSentencizedUserInfo(SMError *error);
