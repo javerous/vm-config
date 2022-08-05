@@ -63,7 +63,7 @@ typedef struct SMBytesWritter
 */
 #pragma mark - Functions
 
-off_t SMWriteAppendBytes(SMBytesWritter *writter, const void *bytes, size_t size);
-off_t SMWriteAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, size_t count);
-off_t SMWriteAppendByte(SMBytesWritter *writter, uint8_t byte);
-off_t SMWriteAppendSpace(SMBytesWritter *writter, size_t size);
+off_t SMBytesWritterAppendBytes(SMBytesWritter *writter, const void *bytes, size_t size);
+off_t SMBytesWritterAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, size_t count);
+off_t SMBytesWritterAppendByte(SMBytesWritter *writter, uint8_t byte);
+off_t SMBytesWritterAppendSpace(SMBytesWritter *writter, size_t size);

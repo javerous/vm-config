@@ -32,7 +32,7 @@
 */
 #pragma mark - Inlines
 
-static __attribute__((always_inline))
+static __attribute__((always_inline)) inline
 void SMWritterReallocAppendSize(SMBytesWritter *writter, size_t size)
 {
 	if (writter->bytes_size < writter->size + size)
@@ -50,7 +50,7 @@ void SMWritterReallocAppendSize(SMBytesWritter *writter, size_t size)
 */
 #pragma mark - Functions
 
-off_t SMWriteAppendBytes(SMBytesWritter *writter, const void *bytes, size_t size)
+off_t SMBytesWritterAppendBytes(SMBytesWritter *writter, const void *bytes, size_t size)
 {
 	off_t result = writter->size;
 
@@ -62,7 +62,7 @@ off_t SMWriteAppendBytes(SMBytesWritter *writter, const void *bytes, size_t size
 	return result;
 }
 
-off_t SMWriteAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, size_t count)
+off_t SMBytesWritterAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, size_t count)
 {
 	off_t result = writter->size;
 
@@ -74,7 +74,7 @@ off_t SMWriteAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, size_t co
 	return result;
 }
 
-off_t SMWriteAppendByte(SMBytesWritter *writter, uint8_t byte)
+off_t SMBytesWritterAppendByte(SMBytesWritter *writter, uint8_t byte)
 {
 	off_t result = writter->size;
 
@@ -86,7 +86,7 @@ off_t SMWriteAppendByte(SMBytesWritter *writter, uint8_t byte)
 	return result;
 }
 
-off_t SMWriteAppendSpace(SMBytesWritter *writter, size_t size)
+off_t SMBytesWritterAppendSpace(SMBytesWritter *writter, size_t size)
 {
 	off_t result = writter->size;
 

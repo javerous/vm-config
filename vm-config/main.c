@@ -28,6 +28,7 @@
 #include <dirent.h>
 #include <getopt.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <uuid/uuid.h>
 
@@ -77,6 +78,7 @@ static void SMDumpBytes(const void *bytes, size_t size, size_t padding);
 
 int main(int argc, const char * argv[])
 {
+	// Check argument & print usage.
 	if (argc < 2)
 	{
 		fprintf(stderr, "Usage: %s <verb>\n", getprogname());
@@ -102,6 +104,7 @@ int main(int argc, const char * argv[])
 		return 1;
 	}
 	
+	// Disaptch.
 	const char *verb = argv[1];
 	
 	if (strcmp(verb, "show") == 0)
@@ -110,10 +113,11 @@ int main(int argc, const char * argv[])
 		return main_change(argc - 1, argv + 1);
 	else
 	{
-		fprintf(stderr, "Unknow verb '%s'.\n", verb);
+		fprintf(stderr, "Error: Unknow verb '%s'.\n", verb);
 		return 1;
 	}
 }
+
 
 #pragma mark > Show
 
@@ -130,7 +134,7 @@ static int main_show(int argc, const char * argv[])
 	
 	if (argc < 2)
 	{
-		fprintf(stderr, "Error: missing vm path.\n");
+		fprintf(stderr, "Error: Missing virtual machine bundle path.\n");
 		return EXIT_FAILURE;
 	}
 	
@@ -211,7 +215,7 @@ static int main_show(int argc, const char * argv[])
 			}
 				
 			default:
-				fprintf(stderr, "Error: invalid option - check usage.\n");
+				fprintf(stderr, "Error: Invalid option. Please check usage.\n");
 				goto fail;
 		}
 	}
@@ -221,19 +225,20 @@ static int main_show(int argc, const char * argv[])
 	
 	if (argc != 0)
 	{
-		fprintf(stderr, "Error: invalid extra parameters - check usage.\n");
+		fprintf(stderr, "Error: Invalid extra parameters. Please check usage.\n");
 		goto fail;
 	}
-	
 	
 	// Print VMX.
 	if (show_vmx)
 	{
+		// > Open VMX file.
 		SMVMwareVMX *vmx = SMGetVMXFromVM(vm_path, &g_vmx, &error);
 		
 		if (!vmx)
 			goto fail;
 						
+		// > List & print entries.
 		size_t count = SMVMwareVMXEntriesCount(vmx);
 		
 		fprintf(stdout, "-- VMX (%lu entries) --\n", count);
@@ -289,11 +294,13 @@ static int main_show(int argc, const char * argv[])
 	// Print NVRAM.
 	if (show_nvram || show_nvram_efi_variables || show_nvram_efi_variable)
 	{
+		// > Open NVRAM file.
 		SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
 		
 		if (!nvram)
 			goto fail;
 		
+		// > List & print entries.
 		size_t count = SMVMwareNVRAMEntriesCount(nvram);
 		
 		if (show_nvram)
@@ -375,6 +382,11 @@ static int main_show(int argc, const char * argv[])
 
 					fprintf(stdout, "\n");
 
+					// > Name.
+					fprintf(stdout, "       Name:\n");
+					SMDumpBytes(name, name_size, 11);
+					fprintf(stdout, "\n");
+					
 					// > UTF-8 name.
 					if (utf8_name)
 					{
@@ -387,19 +399,23 @@ static int main_show(int argc, const char * argv[])
 						if (valid_utf)
 							fprintf(stdout, "       Name (UTF-8): %s\n\n", utf8_name);
 					}
+					
+					// > Value.
+					fprintf(stdout, "       Value:\n");
+					SMDumpBytes(value, value_size, 11);
+					
+					fprintf(stdout, "\n");
 
-					// > Specific keys handling.
-					if (memcmp(&guid, &apple_nvram_variable_guid, sizeof(guid)) == 0 ||
-						memcmp(&guid, &apple_screen_resolution_guid, sizeof(guid)) == 0 ||
-						memcmp(&guid, &dhcpv6_service_binding_guid, sizeof(guid)) == 0)
+					// > Specific value handling.
+					if (memcmp(&guid, &apple_nvram_variable_guid, sizeof(guid)) == 0)
 					{
 						if (utf8_name && strcmp(utf8_name, "csr-active-config") == 0 && value_size == 4)
 						{
 							const uint32_t	*csr_ptr = value;
 							uint32_t 		csr = *csr_ptr;
-
-							fprintf(stdout, "       CSR: 0x%x\n", csr);
-
+							
+							fprintf(stdout, "       Value (Configurable Security Restrictions): 0x%x\n", csr);
+							
 							if (csr & CSR_ALLOW_UNTRUSTED_KEXTS)			fprintf(stdout, "           allow-untrusted-kexts\n");
 							if (csr & CSR_ALLOW_UNRESTRICTED_FS)			fprintf(stdout, "           allow-unrestricted-fs\n");
 							if (csr & CSR_ALLOW_TASK_FOR_PID)				fprintf(stdout, "           allow-task-for-pid\n");
@@ -412,21 +428,63 @@ static int main_show(int argc, const char * argv[])
 							if (csr & CSR_ALLOW_UNAPPROVED_KEXTS)			fprintf(stdout, "           allow-unapproved-kexts\n");
 							if (csr & CSR_ALLOW_EXECUTABLE_POLICY_OVERRIDE)	fprintf(stdout, "           allow-executable-policy-override\n");
 							if (csr & CSR_ALLOW_UNAUTHENTICATED_ROOT)		fprintf(stdout, "           allow-unauthenticated-root\n");
+							
+							fprintf(stdout, "\n");
+						}
+						else if (utf8_name && strcmp(utf8_name, "platform-uuid") == 0 && value_size == sizeof(uuid_t))
+						{
+							uuid_string_t uuid_str;
+							
+							uuid_unparse(value, uuid_str);
+							
+							fprintf(stdout, "       Value (UUID): %s\n", uuid_str);
+							fprintf(stdout, "\n");
+						}
+						else if (utf8_name && strcmp(utf8_name, "fmm-computer-name") == 0 && value_size > 0)
+						{
+							fprintf(stdout, "       Value (Find My Mac Computer Name): ");
+							
+							if (((const char *)value)[value_size - 1] != 0)
+							{
+								fwrite(value, value_size, 1, stdout);
+								fprintf(stdout, "\n\n");
+							}
+							else
+								fprintf(stdout, "%s\n\n", (const char *)value);
+						}
+					}
+					else if (memcmp(&guid, &apple_screen_resolution_guid, sizeof(guid)) == 0)
+					{
+						if (utf8_name && strcmp(utf8_name, "width") == 0 && value_size == 4)
+						{
+							const uint32_t *width = value;
 
+							fprintf(stdout, "       Value (screen width): %u pixels\n", *width);
+							fprintf(stdout, "\n");
+						}
+						else if (utf8_name && strcmp(utf8_name, "height") == 0 && value_size == 4)
+						{
+							const uint32_t *height = value;
+
+							fprintf(stdout, "       Value (screen height): %u pixels\n", *height);
 							fprintf(stdout, "\n");
 						}
 					}
-
-					// > Name.
-					fprintf(stdout, "       Name:\n");
-					SMDumpBytes(name, name_size, 11);
-					fprintf(stdout, "\n");
-
-					// > Value.
-					fprintf(stdout, "       Value:\n");
-					SMDumpBytes(value, value_size, 11);
-
-					fprintf(stdout, "\n\n");
+					else if (memcmp(&guid, &dhcpv6_service_binding_guid, sizeof(guid)) == 0)
+					{
+						if (utf8_name && strcmp(utf8_name, "ClientId") == 0 && value_size == 4 + sizeof(uuid_t))
+						{
+							const uint32_t	*unknown = value;
+							uuid_string_t	uuid_str;
+							
+							uuid_unparse(value + 4, uuid_str);
+							
+							fprintf(stdout, "       Value (DHCPv6 Service Binding - Client ID):\n");
+							fprintf(stdout, "           Unknown value: 0x%x (%u)\n", *unknown, *unknown);
+							fprintf(stdout, "           UUID:          %s\n", uuid_str);
+							fprintf(stdout, "\n");
+						}
+					}
 				}
 
 				fprintf(stdout, "\n");
@@ -459,7 +517,7 @@ fail:
 	result = EXIT_FAILURE;
 	
 	if (error)
-		fprintf(stderr, "Error: %s.\n", SMErrorGetUserInfo(error));
+		fprintf(stderr, "Error: %s\n", SMErrorGetSentencizedUserInfo(error));
 	
 clean:
 	free(show_nvram_efi_variable);
@@ -489,7 +547,7 @@ static int main_change(int argc, const char * argv[])
 	
 	if (argc < 2)
 	{
-		fprintf(stderr, "Error: missing vm path.\n");
+		fprintf(stderr, "Error: Missing virtual machine bundle path.\n");
 		return EXIT_FAILURE;
 	}
 	
@@ -542,12 +600,13 @@ static int main_change(int argc, const char * argv[])
 		{
 			case SMMainChangeBootArgs:
 			{
-				// Change NVRAM.
+				// Open NVRAM file.
 				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
 
 				if (!nvram)
 					goto fail;
 
+				// Set boot arguments.
 				if (!SMVMwareNVRAMSetBootArgs(nvram, optarg, &error))
 					goto fail;
 				
@@ -575,26 +634,28 @@ static int main_change(int argc, const char * argv[])
 				{
 					// Get VMX.
 					SMVMwareVMX *vmx = SMGetVMXFromVM(vm_path, &g_vmx, &error);
-
+					
 					if (!vmx)
 						goto fail;
-
+					
 					// Extract macOS version.
 					macos_version = SMVMwareVMXExtractMacOSVersion(vmx);
-
+					
 					if (SMVersionIsEqual(macos_version, SMVersionInvalid))
-						fprintf(stderr, "Warning: can't detected macosVersion - use acceptable csr default behavior.\n");
+						fprintf(stderr, "Warning: Unable to detected macOS version. Using an acceptable CSR default behavior.\n");
 					else
-						fprintf(stderr, "Info: macOS version %d.%d.%d detected - use this version for csr behavior.\n", macos_version.major_version, macos_version.minor_version, macos_version.patch_version);
+						fprintf(stderr, "Info: macOS version %d.%d.%d detected. Using this version for CSR behavior.\n", macos_version.major_version, macos_version.minor_version, macos_version.patch_version);
+					
+					fprintf(stderr, "\n");
 				}
 
-				// Get NVRAM.
+				// Open NVRAM file.
 				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
 				
 				if (!nvram)
 					goto fail;
 
-				// Change NVRAM.
+				// Change CSR active configuration.
 				bool enable = (ch == SMMainChangeCSREnable || ch == SMMainChangeCSREnableVersion);
 					
 				if (!SMVMwareNVRAMSetAppleCSRActivation(nvram, macos_version, enable, &error))
@@ -605,28 +666,32 @@ static int main_change(int argc, const char * argv[])
 				
 			case SMMainChangeCSRFlags:
 			{
-				errno = 0;
+				// Parse integer.
+				//
+				// Why those libc functions have to be so... "chaotic evil"...
+				// I think I handled all errors possible from what I understand of the man page, but who know ?
 				
-				// Parse integer. Why those libc functions have to be so... chaotic bad...
-				// I think I handled all errors possible from what I understand of the man page, but who know.
+				errno = 0;
+
 				char				*endp = NULL;
 				unsigned long long	result = strtoull(optarg, &endp, 16);
 				uint32_t 			new_csr = 0;
 				
 				if ((*optarg == 0) || !endp || *endp != 0 || ((result == ULONG_MAX || result == 0) && errno != 0) || result > UINT32_MAX)
 				{
-					fprintf(stderr, "Error: invalid value '%s'.\n", optarg);
+					fprintf(stderr, "Error: Invalid value '%s'.\n", optarg);
 					goto fail;
 				}
 				
 				new_csr = (uint32_t)result;
 				
-				// Change NVRAM.
+				// Open NVRAM file.
 				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
 				
 				if (!nvram)
 					goto fail;
 					
+				// Change CSR active configuration.
 				if (!SMVMwareNVRAMSetAppleCSRActiveConfig(nvram, new_csr, &error))
 					goto fail;
 				
@@ -641,25 +706,27 @@ static int main_change(int argc, const char * argv[])
 				
 				if (uuid_parse(uuid_str, uuid) == -1)
 				{
-					fprintf(stderr, "Error: invalid UUID '%s'.\n", uuid_str);
+					fprintf(stderr, "Error: Invalid UUID '%s'.\n", uuid_str);
 					goto fail;
 				}
 				
-				// Change VMX.
+				// Open VMX.
 				SMVMwareVMX *vmx = SMGetVMXFromVM(vm_path, &g_vmx, &error);
 				
 				if (!vmx)
 					goto fail;
 				
+				// Change machine UUID.
 				if (!SMVMwareVMXSetMachineUUID(vmx, uuid, &error))
 					goto fail;
 
-				// Change NVRAM.
+				// Open NVRAM file.
 				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
 				
 				if (!nvram)
 					goto fail;
 				
+				// Change machine UUID.
 				if (!SMVMwareNVRAMSetAppleMachineUUID(nvram, uuid, &error))
 					goto fail;
 				
@@ -668,7 +735,7 @@ static int main_change(int argc, const char * argv[])
 				
 			case SMMainChangeScreenResolution:
 			{
-				// Parse argument.
+				// Parse screen resolution.
 				unsigned int	width = 0, height = 0;
 				size_t			optarg_len = strlen(optarg);
 				int				scan_len = 0;
@@ -676,31 +743,17 @@ static int main_change(int argc, const char * argv[])
 				
 				if (sresult != 2 || scan_len != optarg_len)
 				{
-					fprintf(stderr, "Error: invalid screen resolution - check usage.\n");
+					fprintf(stderr, "Error: Invalid screen resolution. Pleaase check usage.\n");
 					goto fail;
 				}
 				
-				// Apply some arbitrary constraints, something which doesn't look too crazy or risky.
-				// This software is open-source, anyone can change them if they don't agree...
-				// Anyway, VMware Fusion (or macOS ?) fix them if they are not valid.
-				if (width < 100 || width > 50000)
-				{
-					fprintf(stderr, "Error: width should be in the range of [100;50000].\n");
-					goto fail;
-				}
-				
-				if (height < 100 || height > 50000)
-				{
-					fprintf(stderr, "Error: height should be in the range of [100;50000].\n");
-					goto fail;
-				}
-				
-				// Change NVRAM.
+				// Open NVRAM file.
 				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
 				
 				if (!nvram)
 					goto fail;
 				
+				// Change screen resolution.
 				if (!SMVMwareNVRAMSetScreenResolution(nvram, width, height, &error))
 					goto fail;
 				
@@ -708,7 +761,7 @@ static int main_change(int argc, const char * argv[])
 			}
 				
 			default:
-				fprintf(stderr, "Error: invalid option - check usage.\n");
+				fprintf(stderr, "Error: Invalid option. Please check usage.\n");
 				goto fail;
 		}
 	}
@@ -718,7 +771,7 @@ static int main_change(int argc, const char * argv[])
 	
 	if (argc != 0)
 	{
-		fprintf(stderr, "Error: invalid extra parameters - check usage.\n");
+		fprintf(stderr, "Error: Invalid extra parameters. Please check usage.\n");
 		goto fail;
 	}
 
@@ -770,13 +823,13 @@ static int main_change(int argc, const char * argv[])
 	// > Stage files.
 	if (vmx_path && vmx_path_tmp_path && rename(vmx_path_tmp_path, vmx_path) == -1)
 	{
-		fprintf(stderr, "Error: failed to replace vmx file ('%s' -> '%s').\n", vmx_path_tmp_path, vmx_path);
+		fprintf(stderr, "Error: Failed to replace vmx file ('%s' -> '%s') - %d (%s).\n", vmx_path_tmp_path, vmx_path, errno, strerror(errno));
 		goto fail;
 	}
 	
 	if (nvram_path && nvram_path_tmp_path && rename(nvram_path_tmp_path, nvram_path) == -1)
 	{
-		fprintf(stderr, "Error: failed to replace nvram file ('%s' -> '%s').\n", nvram_path_tmp_path, nvram_path);
+		fprintf(stderr, "Error: Failed to replace nvram file ('%s' -> '%s') - %d (%s).\n", nvram_path_tmp_path, nvram_path, errno, strerror(errno));
 		goto fail;
 	}
 	
@@ -789,7 +842,7 @@ fail:
 	result = EXIT_FAILURE;
 	
 	if (error)
-		fprintf(stderr, "Error: %s.\n", SMErrorGetUserInfo(error));
+		fprintf(stderr, "Error: %s\n", SMErrorGetSentencizedUserInfo(error));
 	
 clean:
 	SMErrorFree(error);
@@ -831,7 +884,7 @@ static SMVMwareVMX * SMGetVMXFromVM(const char *vm_path, SMVMwareVMX **inoutVMX,
 	
 	if (!dir)
 	{
-		SMSetErrorPtr(error, "main", -1, "can't open vm bundle");
+		SMSetErrorPtr(error, "main", -1, "can't open virtual machine bundle (%d - %s)", errno, strerror(errno));
 		goto finish;
 	}
 	
@@ -917,9 +970,10 @@ static void SMDumpBytes(const void *bytes, size_t size, size_t padding)
 	const uint8_t *ubytes = bytes;
 
 	// Forge padding string.
-	char *padding_str;
+	char *padding_str = malloc(padding + 1);
 	
-	padding_str = malloc(padding + 1);
+	assert(padding_str);
+	
 	memset(padding_str, ' ', padding);
 	padding_str[padding] = 0;
 		

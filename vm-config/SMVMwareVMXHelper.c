@@ -218,7 +218,7 @@ SMDetailedField * SMDetailedFieldsFromString(const char *detailed_data)
 
 		while (*str && !isblank(*str) && *str != '=')
 		{
-			SMWriteAppendByte(&key_writter, *str);
+			SMBytesWritterAppendByte(&key_writter, *str);
 			str++;
 		}
 
@@ -228,7 +228,7 @@ SMDetailedField * SMDetailedFieldsFromString(const char *detailed_data)
 			goto done;
 		}
 
-		SMWriteAppendByte(&key_writter, 0);
+		SMBytesWritterAppendByte(&key_writter, 0);
 
 		// > Skip separator.
 		while (*str && *str != '\'')
@@ -259,7 +259,7 @@ SMDetailedField * SMDetailedFieldsFromString(const char *detailed_data)
 		{
 			if (last_escaped)
 			{
-				SMWriteAppendByte(&value_writter, *str);
+				SMBytesWritterAppendByte(&value_writter, *str);
 				last_escaped = false;
 			}
 			else
@@ -269,7 +269,7 @@ SMDetailedField * SMDetailedFieldsFromString(const char *detailed_data)
 				else if (*str == '\'')
 					value_extracting = false;
 				else
-					SMWriteAppendByte(&value_writter, *str);
+					SMBytesWritterAppendByte(&value_writter, *str);
 			}
 		}
 
@@ -281,10 +281,10 @@ SMDetailedField * SMDetailedFieldsFromString(const char *detailed_data)
 			goto done;
 		}
 
-		SMWriteAppendByte(&value_writter, 0);
+		SMBytesWritterAppendByte(&value_writter, 0);
 
 		// > Append field.
-		off_t 			field_offset = SMWriteAppendSpace(&fields_writter, sizeof(SMDetailedField));
+		off_t 			field_offset = SMBytesWritterAppendSpace(&fields_writter, sizeof(SMDetailedField));
 		SMDetailedField	*field = SMBytesWritterPtrOff(SMDetailedField, &fields_writter, field_offset);
 
 		field->key = SMBytesWritterPtr(&key_writter);
@@ -293,8 +293,22 @@ SMDetailedField * SMDetailedFieldsFromString(const char *detailed_data)
 
 done:
 	// Append terminal empty field.
-	SMWriteAppendRepeatedByte(&fields_writter, 0, sizeof(SMDetailedField));
+	SMBytesWritterAppendRepeatedByte(&fields_writter, 0, sizeof(SMDetailedField));
 
 	// Return.
-	return SMBytesWritterPtrOff(SMDetailedField, &fields_writter, 0);
+	return SMBytesWritterPtr(&fields_writter);
+}
+
+void SMDetailedFieldsFree(SMDetailedField *fields)
+{
+	for (size_t i = 0; ; i++)
+	{
+		if (!fields[i].key || !fields[i].value)
+			break;
+	
+		free(fields[i].key);
+		free(fields[i].value);
+	}
+	
+	free(fields);
 }

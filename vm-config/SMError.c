@@ -25,8 +25,11 @@
 #include <stdarg.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include "SMError.h"
+
+#include "SMBytesWritter.h"
 
 
 /*
@@ -39,6 +42,7 @@ struct SMError
 	char	*domain;
 	int		code;
 	char	*user_info;
+	char	*sentensized_user_info;
 };
 
 
@@ -52,7 +56,7 @@ struct SMError
 SMError * SMErrorCreate(const char *domain, int code, const char *user_info, ...)
 {
 	va_list ap;
-	SMError *result = malloc(sizeof(SMError));
+	SMError *result = calloc(1, sizeof(SMError));
 	
 	assert(result);
 	
@@ -75,6 +79,7 @@ void SMErrorFree(SMError *error)
 	
 	free(error->domain);
 	free(error->user_info);
+	free(error->sentensized_user_info);
 	free(error);
 }
 
@@ -94,4 +99,44 @@ int SMErrorGetCode(SMError *error)
 const char * SMErrorGetUserInfo(SMError *error)
 {
 	return error->user_info;
+}
+
+const char * SMErrorGetSentencizedUserInfo(SMError *error)
+{
+	// Pre-checks.
+	if (error->sentensized_user_info)
+		return error->sentensized_user_info;
+	
+	if (!error->user_info)
+		return NULL;
+	
+	size_t len = strlen(error->user_info);
+	
+	if (len == 0)
+		return error->user_info;
+
+	// Forge result.
+	SMBytesWritter	writter = SMBytesWritterInit();
+	const char		*uis = error->user_info;
+	
+	// > Capitalize.
+	if (islower(*uis))
+	{
+		SMBytesWritterAppendByte(&writter, toupper(*uis));
+		SMBytesWritterAppendBytes(&writter, uis + 1, len - 1);
+	}
+	else
+		SMBytesWritterAppendBytes(&writter, uis, len);
+	
+	// > Terminate with a period.
+	if (uis[len - 1] != '.')
+		SMBytesWritterAppendByte(&writter, '.');
+
+	// > Null-terminate.
+	SMBytesWritterAppendByte(&writter, 0);
+
+	// Hold & return.
+	error->sentensized_user_info = SMBytesWritterPtr(&writter);
+	
+	return error->sentensized_user_info;
 }

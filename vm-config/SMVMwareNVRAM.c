@@ -603,7 +603,7 @@ static const void * SMVMwareNVRAMEntryGetSerializedBytes(SMVMwareNVRAMEntry *ent
 	SMBytesWritter writter = SMBytesWritterInit();
 	
 	// > Write header.
-	off_t 			nvram_entry_offset = SMWriteAppendSpace(&writter, sizeof(nvram_entry_t));
+	off_t 			nvram_entry_offset = SMBytesWritterAppendSpace(&writter, sizeof(nvram_entry_t));
 	nvram_entry_t	*hdr = SMBytesWritterPtrOff(nvram_entry_t, &writter, nvram_entry_offset);
 	
 	memcpy(hdr->name, entry->name, sizeof(hdr->name));
@@ -621,13 +621,13 @@ static const void * SMVMwareNVRAMEntryGetSerializedBytes(SMVMwareNVRAMEntry *ent
 		// > Write magic.
 		uint8_t magic[] = SMEFINVMagic;
 		
-		SMWriteAppendBytes(&writter, magic, sizeof(magic));
+		SMBytesWritterAppendBytes(&writter, magic, sizeof(magic));
 		
 		// > Write zero.
-		SMWriteAppendRepeatedByte(&writter, 0, 4);
+		SMBytesWritterAppendRepeatedByte(&writter, 0, 4);
 		
 		// > Write size (zero for now).
-		off_t data_size_offset = SMWriteAppendRepeatedByte(&writter, 0, 4);
+		off_t data_size_offset = SMBytesWritterAppendRepeatedByte(&writter, 0, 4);
 		
 		// > Writes variables.
 		for (size_t i = 0; i < cnt; i++)
@@ -637,7 +637,7 @@ static const void * SMVMwareNVRAMEntryGetSerializedBytes(SMVMwareNVRAMEntry *ent
 			size_t 		var_size = 0;
 			const void	*var_bytes = SMVMwareNVRAMVariableGetSerializedBytes(variable, &var_size);
 			
-			SMWriteAppendBytes(&writter, var_bytes, var_size);
+			SMBytesWritterAppendBytes(&writter, var_bytes, var_size);
 			
 			data_size += var_size;
 		}
@@ -650,7 +650,7 @@ static const void * SMVMwareNVRAMEntryGetSerializedBytes(SMVMwareNVRAMEntry *ent
 		content_size = SMRoundUp(data_size, 0x40000);
 		update_hdr->len = (uint32_t)content_size;
 		
-		SMWriteAppendRepeatedByte(&writter, 0xff, content_size - data_size);
+		SMBytesWritterAppendRepeatedByte(&writter, 0xff, content_size - data_size);
 		
 		// > Update data size.
 		uint32_t *data_size_ptr = SMBytesWritterPtrOff(uint32_t, &writter, data_size_offset);
@@ -929,7 +929,7 @@ static const void *	SMVMwareNVRAMVariableGetSerializedBytes(SMVMwareNVRAMEFIVari
 	const void	*value_bytes = SMVMwareNVRAMVariableGetValue(variable, &value_size);
 	
 	// > Header.
-	off_t 		efi_var_offset = SMWriteAppendSpace(&writter, sizeof(efi_var_t));
+	off_t 		efi_var_offset = SMBytesWritterAppendSpace(&writter, sizeof(efi_var_t));
 	efi_var_t	*efi_var = SMBytesWritterPtrOff(efi_var_t, &writter, efi_var_offset);
 	
 	memcpy(&efi_var->guid, &variable->guid, sizeof(efi_guid_t));
@@ -938,8 +938,8 @@ static const void *	SMVMwareNVRAMVariableGetSerializedBytes(SMVMwareNVRAMEFIVari
 	efi_var->name_size = (uint32_t)name_size;
 	
 	// > Content.
-	SMWriteAppendBytes(&writter, name_bytes, name_size);
-	SMWriteAppendBytes(&writter, value_bytes, value_size);
+	SMBytesWritterAppendBytes(&writter, name_bytes, name_size);
+	SMBytesWritterAppendBytes(&writter, value_bytes, value_size);
 
 	// > Hold result.
 	variable->serialized_bytes = writter.bytes;
@@ -1240,7 +1240,7 @@ static bool SMReadMatchingBytes(SMVMwareNVRAM *nvram, const void **bytes, size_t
 			char *desc_match = strdup(SMBytesDescription(match_bytes, match_size));
 			char *desc_bytes = strdup(SMBytesDescription(*bytes, match_size));
 
-			SMSetParseErrorPtr(error, nvram, *bytes, "expected %s but got %s", desc_match, desc_bytes);
+			SMSetParseErrorPtr(error, nvram, *bytes, "expected %s bytes but got %s", desc_match, desc_bytes);
 			
 			free(desc_match);
 			free(desc_bytes);
@@ -1347,6 +1347,8 @@ static char * SMStringUTF16ToUTF8(const void *utf16bytes, size_t len)
 	size_t	strResultLenMax = strInputSize * 3 + 1;
 	char	*strResultBuffer = malloc(strResultLenMax);
 	char	*strResult = strResultBuffer;
+	
+	assert(strResultBuffer);
 
 	if (iconv(conv, (char **)&strInput, &strInputSize, &strResult, &strResultLenMax) == (size_t)(-1))
 		goto finish;
@@ -1403,6 +1405,8 @@ static void * SMStringUTF8ToUTF16(const char *utf8str, bool terminal_zero, size_
 	size_t	strResultLenMax = strInputSize * 3 + 2;
 	char	*strResultBuffer = malloc(strResultLenMax);
 	char	*strResult = strResultBuffer;
+	
+	assert(strResultBuffer);
 
 	if (iconv(conv, (char **)&strInput, &strInputSize, &strResult, &strResultLenMax) == (size_t)(-1))
 		goto finish;
