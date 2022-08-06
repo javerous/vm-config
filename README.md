@@ -3,8 +3,30 @@ vm-config
 
 vm-config is a command line to show or change some VMware Fusion virtual machine configurations.
 
+## Build
 
-#### Example of commands to change configuration
+- **Build on macOS only (Xcode 14 minimum)**
+  - Open `vm-config.xcodeproj` in Xcode and simply build `vm-config` target.
+  - Execute `xcodebuild archive -project 'vm-config.xcodeproj' -scheme 'vm-config' -configuration 'Release' -archivePath 'vm-config.xcarchive'`
+
+- **Build on macOS or Linux**
+  ```
+  $ mkdir build
+  $ cd build
+  $ cmake ../
+  $ make
+  ```
+  
+  On Linux, you may need to install `libbsd` and `libuuid` before. For example:
+  ```
+  sudo apt install libbsd-dev
+  sudo apt install uuid-dev
+  ```
+
+
+## Usage
+
+#### Change virtual machine configuration
 
 - Enable SIP, like `csrutil enable`
   ```
@@ -31,6 +53,11 @@ vm-config is a command line to show or change some VMware Fusion virtual machine
   ```
   vm-config change my_vm.vmwarevm --boot-args 'debug=0x144'
   ```
+  
+- Change the screen resolution of the machine
+  ```
+  vm-config change my_vm.vmwarevm --screen-resolution 1024x768
+  ```
 
 - Change multiple configurations at the same time
   ```
@@ -38,7 +65,7 @@ vm-config is a command line to show or change some VMware Fusion virtual machine
   ```
 
 
-#### Example of commands to show configuration
+#### Show virtual machine configuration
 
 - Show all (vmx content and nvram content)
   ```
