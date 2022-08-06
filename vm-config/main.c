@@ -931,7 +931,7 @@ static void show_version(void)
 #  error Project version not defined
 #endif
 	
-	fprintf(stderr, "vmc-config version " SMStringify(PROJ_VERSION) "\n");
+	fprintf(stderr, "vm-config version " SMStringify(PROJ_VERSION) "\n");
 }
 
 
