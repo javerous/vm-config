@@ -45,6 +45,15 @@
 
 
 /*
+** Defines
+*/
+#pragma mark - Defines
+
+#define SMStringify(a) xSMStringify(a)
+#define xSMStringify(a) #a
+
+
+/*
 ** Types
 */
 #pragma mark - Types
@@ -62,6 +71,10 @@ typedef char uuid_string_t[37];
 // Sub-mains.
 static int main_show(int argc, const char * argv[]);
 static int main_change(int argc, const char * argv[]);
+
+// Information.
+static void show_usage(void);
+static void show_version(void);
 
 // VMware.
 static SMVMwareVMX *	SMGetVMXFromVM(const char *vm_path, SMVMwareVMX **inoutVMX, SMError **error);
@@ -81,39 +94,34 @@ int main(int argc, const char * argv[])
 	// Check argument & print usage.
 	if (argc < 2)
 	{
-		fprintf(stderr, "Usage: %s <verb>\n", getprogname());
+		show_version();
+		
 		fprintf(stderr, "\n");
-		fprintf(stderr, "verbs:\n");
-		fprintf(stderr, "  show [vm.vmwarevm] <content>\n");
-		fprintf(stderr, "    --all                            show all possible content\n");
-		fprintf(stderr, "    --vmx                            show vmx file content\n");
-		fprintf(stderr, "    --nvram                          show nvram file content\n");
-		fprintf(stderr, "    --nvram-efi-variables            show nvram efi variables\n");
-		fprintf(stderr, "    --nvram-efi-variable <name>      show nvram efi the variable with this name\n");
-		fprintf(stderr, "\n");
-		fprintf(stderr, "  change [vm.vmwarevm] <operations>\n");
-		fprintf(stderr, "    --boot-args <string>             set boot arguments\n");
-		fprintf(stderr, "    --csr-enable                     similar to 'csrutil enable'\n");
-		fprintf(stderr, "    --csr-enable-version <version>   similar to 'csrutil enable' for a specific macOS version\n");
-		fprintf(stderr, "    --csr-disable                    similar to 'csrutil disable'\n");
-		fprintf(stderr, "    --csr-disable-version <version>  similar to 'csrutil disable' for a specific macOS version\n");
-		fprintf(stderr, "    --csr-flags <flags>              set Configurable Security Restrictions flags\n");
-		fprintf(stderr, "    --machine-uuid <uuid>            set machine UUID\n");
-		fprintf(stderr, "    --screen-resolution <WxH>        set screen resolution, width x height, e.g. '1920x1080'\n");
-
+		
+		show_usage();
+		
 		return 1;
 	}
 	
 	// Disaptch.
 	const char *verb = argv[1];
 	
+	if (strcmp(verb, "version") == 0)
+	{
+		show_version();
+		return 0;
+	}
 	if (strcmp(verb, "show") == 0)
 		return main_show(argc - 1, argv + 1);
 	else if (strcmp(verb, "change") == 0)
 		return main_change(argc - 1, argv + 1);
 	else
 	{
-		fprintf(stderr, "Error: Unknow verb '%s'.\n", verb);
+		fprintf(stderr, "Error: Unknow verb '%s'. Please check usage.\n", verb);
+		fprintf(stderr, "\n");
+		
+		show_usage();
+		
 		return 1;
 	}
 }
@@ -215,8 +223,14 @@ static int main_show(int argc, const char * argv[])
 			}
 				
 			default:
+			{
 				fprintf(stderr, "Error: Invalid option. Please check usage.\n");
+				fprintf(stderr, "\n");
+				
+				show_usage();
+				
 				goto fail;
+			}
 		}
 	}
 	
@@ -226,6 +240,10 @@ static int main_show(int argc, const char * argv[])
 	if (argc != 0)
 	{
 		fprintf(stderr, "Error: Invalid extra parameters. Please check usage.\n");
+		fprintf(stderr, "\n");
+		
+		show_usage();
+		
 		goto fail;
 	}
 	
@@ -744,6 +762,10 @@ static int main_change(int argc, const char * argv[])
 				if (sresult != 2 || scan_len != optarg_len)
 				{
 					fprintf(stderr, "Error: Invalid screen resolution. Pleaase check usage.\n");
+					fprintf(stderr, "\n");
+					
+					show_usage();
+					
 					goto fail;
 				}
 				
@@ -761,8 +783,14 @@ static int main_change(int argc, const char * argv[])
 			}
 				
 			default:
+			{
 				fprintf(stderr, "Error: Invalid option. Please check usage.\n");
+				fprintf(stderr, "\n");
+				
+				show_usage();
+				
 				goto fail;
+			}
 		}
 	}
 	
@@ -772,6 +800,10 @@ static int main_change(int argc, const char * argv[])
 	if (argc != 0)
 	{
 		fprintf(stderr, "Error: Invalid extra parameters. Please check usage.\n");
+		fprintf(stderr, "\n");
+
+		show_usage();
+		
 		goto fail;
 	}
 
@@ -864,7 +896,45 @@ clean:
 	return result;
 }
 
-			
+
+/*
+** Information
+*/
+#pragma mark - Information
+
+static void show_usage(void)
+{
+	fprintf(stderr, "Usage: %s <verb>\n", getprogname());
+	fprintf(stderr, "\n");
+	fprintf(stderr, "verbs:\n");
+	fprintf(stderr, "  show [vm.vmwarevm] <content>\n");
+	fprintf(stderr, "    --all                            show all possible content\n");
+	fprintf(stderr, "    --vmx                            show vmx file content\n");
+	fprintf(stderr, "    --nvram                          show nvram file content\n");
+	fprintf(stderr, "    --nvram-efi-variables            show nvram efi variables\n");
+	fprintf(stderr, "    --nvram-efi-variable <name>      show nvram efi the variable with this name\n");
+	fprintf(stderr, "\n");
+	fprintf(stderr, "  change [vm.vmwarevm] <operations>\n");
+	fprintf(stderr, "    --boot-args <string>             set boot arguments\n");
+	fprintf(stderr, "    --csr-enable                     similar to 'csrutil enable'\n");
+	fprintf(stderr, "    --csr-enable-version <version>   similar to 'csrutil enable' for a specific macOS version\n");
+	fprintf(stderr, "    --csr-disable                    similar to 'csrutil disable'\n");
+	fprintf(stderr, "    --csr-disable-version <version>  similar to 'csrutil disable' for a specific macOS version\n");
+	fprintf(stderr, "    --csr-flags <flags>              set Configurable Security Restrictions flags\n");
+	fprintf(stderr, "    --machine-uuid <uuid>            set machine UUID\n");
+	fprintf(stderr, "    --screen-resolution <WxH>        set screen resolution, width x height, e.g. '1920x1080'\n");
+}
+
+static void show_version(void)
+{
+#ifndef PROJ_VERSION
+#  error Project version not defined
+#endif
+	
+	fprintf(stderr, "vmc-config version " SMStringify(PROJ_VERSION) "\n");
+}
+
+
 /*
 ** Helpers
 */
