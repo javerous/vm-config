@@ -417,6 +417,7 @@ static SMVMwareVMXEntry * SMVMwareVMXEntryCreateFromLine(const char *line, size_
 		// > Skip value delimiter.
 		line++;
 		
+		
 		// Extract value.
 		SMBytesWritter value_writter = SMBytesWritterInit();
 		
@@ -452,6 +453,7 @@ static SMVMwareVMXEntry * SMVMwareVMXEntryCreateFromLine(const char *line, size_
 		}
 		
 		SMBytesWritterAppendByte(&value_writter, 0);
+		
 		
 		// Store result.
 		result->original_key = SMBytesWritterPtr(&key_writter);
