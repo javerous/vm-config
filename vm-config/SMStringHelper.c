@@ -21,6 +21,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
@@ -62,7 +63,7 @@ char * SMStringTrimCharacter(char *str, const char *chars, size_t chars_cnt, boo
 	// Trim beggining.
 	while (*str && is_char(*str))
 		str++;
-	
+		
 	if (*str == 0)
 	{
 		if (free_str)
@@ -77,14 +78,6 @@ char * SMStringTrimCharacter(char *str, const char *chars, size_t chars_cnt, boo
 	
 	while (end != str && (*end == 0 || is_char(*end)))
 		end--;
-	
-	if (end == str)
-	{
-		if (free_str)
-			free(str);
-		
-		return strdup("");
-	}
 	
 	// Forge result.
 	size_t	flen = (end - str) + 1;

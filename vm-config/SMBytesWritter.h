@@ -24,7 +24,10 @@
 
 
 #include <stdlib.h>
+#include <assert.h>
+
 #include <sys/types.h>
+
 
 
 /*
@@ -35,14 +38,11 @@
 #define SMBytesWritterInit() { 0 }
 
 #define SMBytesWritterPtrOff(Type, Writter, Offset) ({	\
-	Type * __value = (Writter)->bytes + (Offset);		\
+	void *__bytes = SMBytesWritterPtr(Writter);			\
+	Type *__value = __bytes + (Offset);					\
 														\
 	__value;											\
 })
-
-#define SMBytesWritterPtr(Writter)	({ (Writter)->bytes; })
-#define SMBytesWritterSize(Writter)	({ (Writter)->size; })
-#define SMBytesWritterFree(Writter)	({ free((Writter)->bytes); })
 
 
 /*
@@ -64,7 +64,94 @@ typedef struct SMBytesWritter
 */
 #pragma mark - Functions
 
-off_t SMBytesWritterAppendBytes(SMBytesWritter *writter, const void *bytes, size_t size);
-off_t SMBytesWritterAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, size_t count);
-off_t SMBytesWritterAppendByte(SMBytesWritter *writter, uint8_t byte);
-off_t SMBytesWritterAppendSpace(SMBytesWritter *writter, size_t size);
+#pragma mark > Helpers
+
+static __attribute__((always_inline)) inline
+void SMWritterReallocAppendSize(SMBytesWritter *writter, size_t size)
+{
+	if (writter->bytes_size < writter->size + size)
+	{
+		writter->bytes_size = writter->size + size + 10;
+		writter->bytes = reallocf(writter->bytes, writter->bytes_size);
+
+		assert(writter->bytes);
+	}
+}
+
+
+#pragma mark > Instance
+
+static __attribute__((always_inline)) inline
+void SMBytesWritterFree(SMBytesWritter *writter)
+{
+	free(writter->bytes);
+}
+
+
+#pragma mark > Properties
+
+static __attribute__((always_inline)) inline
+void * SMBytesWritterPtr(SMBytesWritter *writter)
+{
+	return writter->bytes;
+}
+
+static __attribute__((always_inline)) inline
+size_t SMBytesWritterSize(SMBytesWritter *writter)
+{
+	return writter->size;
+}
+
+
+#pragma mark > Append
+
+static __attribute__((always_inline)) inline
+off_t SMBytesWritterAppendBytes(SMBytesWritter *writter, const void *bytes, size_t size)
+{
+	off_t result = writter->size;
+
+	SMWritterReallocAppendSize(writter, size);
+
+	memcpy(writter->bytes + writter->size, bytes, size);
+	writter->size += size;
+
+	return result;
+}
+
+static __attribute__((always_inline)) inline
+off_t SMBytesWritterAppendRepeatedByte(SMBytesWritter *writter, uint8_t byte, size_t count)
+{
+	off_t result = writter->size;
+
+	SMWritterReallocAppendSize(writter, count);
+
+	memset(writter->bytes + writter->size, (int)byte, count);
+	writter->size += count;
+
+	return result;
+}
+
+static __attribute__((always_inline)) inline
+off_t SMBytesWritterAppendByte(SMBytesWritter *writter, uint8_t byte)
+{
+	off_t result = writter->size;
+
+	SMWritterReallocAppendSize(writter, 1);
+
+	*(((uint8_t *)writter->bytes) + writter->size) = byte;
+	writter->size += 1;
+
+	return result;
+}
+
+static __attribute__((always_inline)) inline
+off_t SMBytesWritterAppendSpace(SMBytesWritter *writter, size_t size)
+{
+	off_t result = writter->size;
+
+	SMWritterReallocAppendSize(writter, size);
+
+	writter->size += size;
+
+	return result;
+}

@@ -247,8 +247,11 @@ SMDetailedField * SMDetailedFieldsFromString(const char *detailed_data)
 			str++;
 
 		if (*str == 0)
+		{
+			SMBytesWritterFree(&key_writter);
 			goto done;
-
+		}
+		
 		// > Extract value.
 		SMBytesWritter value_writter = SMBytesWritterInit();
 
