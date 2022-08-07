@@ -1,0 +1,10 @@
+.encoding = "UTF-8"
+displayName = "macOS 10.15"
+config.version = "8"
+pciBridge0.present = "TRUE"
+
+
+guestOS = "darwin19-64"
+
+# A comment
+firmware = "efi"
