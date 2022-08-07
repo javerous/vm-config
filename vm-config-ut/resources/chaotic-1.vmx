@@ -1,0 +1,26 @@
+    key1    =    "value1"
+key2="value2"
+	 	 	 key3 	 	 	= 	 	 "value3" 	 	 
+key4="   value4   "
+key5 = "   value5   "
+
+key6 = "value\"hello"
+key6 = "\"valuehello"
+key6 = "valuehello\""
+
+key7 = "content with space"
+key8 = " content with space"
+key9 = "content with space "
+key10 = " content with space "
+
+guestOS.detailed.data = "bitness='64' buildNumber='19H512' distroName='Mac OS X' distroVersion='10.15.7' familyName='Darwin' kernelVersion='19.6.0'"
+
+empty1 = ""
+empty2=""
+empty3=""   
+
+# A comment
+#
+#     		
+# Another comment
+#Stick comment
