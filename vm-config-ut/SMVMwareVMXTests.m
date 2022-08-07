@@ -24,6 +24,21 @@
 
 #import "SMVMwareVMXHelper.h"
 
+#import "SMTestsTools.h"
+
+
+/*
+** Types
+*/
+#pragma mark - Types
+
+typedef struct
+{
+	SMVMwareVMXEntryType type;
+	const char *key;
+	const char *value;
+} SMVMXEntryTest;
+
 
 /*
 ** SMVMwareVMXTests
@@ -37,6 +52,175 @@
 @implementation SMVMwareVMXTests
 
 #pragma mark - Tests
+
+- (void)setUp
+{
+	self.continueAfterFailure = NO;
+}
+
+- (void)testBasic1Parsing
+{
+	// Parse file.
+	SMError		*error = NULL;
+	SMVMwareVMX *vmx = [self vmxForFile:@"basic-1" error:&error];
+	
+	XCTAssert(vmx, @"failed to parse file: %s", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmx);
+	};
+	
+	// Validate content.
+	SMVMXEntryTest testEntries[] = {
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = ".encoding", .value = "UTF-8" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "displayName", .value = "macOS 10.15" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "config.version", .value = "8" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "pciBridge0.present", .value = "TRUE" },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "guestOS", .value = "darwin19-64" },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeComment, .value = "A comment" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "firmware", .value = "efi" },
+	};
+	
+	[self validateEntriesOfVMX:vmx withTestEntries:testEntries count:sizeof(testEntries) / sizeof(*testEntries)];
+}
+
+- (void)testChaotic1Parsing
+{
+	// Parse file.
+	SMError		*error = NULL;
+	SMVMwareVMX *vmx = [self vmxForFile:@"chaotic-1" error:&error];
+	
+	XCTAssert(vmx, @"failed to parse file: %s", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmx);
+	};
+	
+	// Validate content.
+	SMVMXEntryTest testEntries[] = {
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key1", .value = "value1" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key2", .value = "value2" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key3", .value = "value3" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key4", .value = "   value4   " },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key5", .value = "   value5   " },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key6", .value = "value\"hello" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key6", .value = "\"valuehello" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key6", .value = "valuehello\"" },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key7", .value = "content with space" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key8", .value = " content with space" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key9", .value = "content with space " },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key10", .value = " content with space " },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "guestOS.detailed.data", .value = "bitness='64' buildNumber='19H512' distroName='Mac OS X' distroVersion='10.15.7' familyName='Darwin' kernelVersion='19.6.0'" },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "empty1", .value = "" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "empty2", .value = "" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "empty3", .value = "" },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeComment, .value = "A comment" },
+		{ .type = SMVMwareVMXEntryTypeComment, .value = "" },
+		{ .type = SMVMwareVMXEntryTypeComment, .value = "" },
+		{ .type = SMVMwareVMXEntryTypeComment, .value = "Another comment" },
+		{ .type = SMVMwareVMXEntryTypeComment, .value = "Stick comment" },
+	};
+	
+	[self validateEntriesOfVMX:vmx withTestEntries:testEntries count:sizeof(testEntries) / sizeof(*testEntries)];
+}
+
+- (void)testFail1Parsing
+{
+	// Parse file.
+	SMError		*error = NULL;
+	SMVMwareVMX *vmx = [self vmxForFile:@"fail-1" error:&error];
+	
+	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx");
+	
+	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmx);
+	};
+}
+
+- (void)testFail2Parsing
+{
+	// Parse file.
+	SMError		*error = NULL;
+	SMVMwareVMX *vmx = [self vmxForFile:@"fail-2" error:&error];
+	
+	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx");
+	
+	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmx);
+	};
+}
+
+- (void)testFail3Parsing
+{
+	// Parse file.
+	SMError		*error = NULL;
+	SMVMwareVMX *vmx = [self vmxForFile:@"fail-3" error:&error];
+	
+	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx");
+	
+	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmx);
+	};
+}
+
+- (void)testFail4Parsing
+{
+	// Parse file.
+	SMError		*error = NULL;
+	SMVMwareVMX *vmx = [self vmxForFile:@"fail-4" error:&error];
+	
+	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx");
+	
+	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmx);
+	};
+}
+
+- (void)testParserStability
+{
+	// Parse file.
+	SMError		*error = NULL;
+	SMVMwareVMX *vmx = [self vmxForFile:@"basic-1" error:&error];
+	
+	XCTAssert(vmx, @"failed to parse file: %s", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmx);
+	};
+	
+	// Write parsed file.
+	NSString *tempOutput = [self generateTempFilePath];
+	
+	XCTAssertTrue(SMVMwareVMXWriteToFile(vmx, tempOutput.fileSystemRepresentation, &error), @"failed to write file: %s", SMErrorGetUserInfo(error));
+	
+	// Compare.
+	const char	*cResourcePath = SMVMwareVMXGetPath(vmx);
+	NSString	*resourcePath = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:cResourcePath length:strlen(cResourcePath)];
+		
+	NSData *refData = [NSData dataWithContentsOfFile:resourcePath];
+	NSData *writtenData = [NSData dataWithContentsOfFile:tempOutput];
+	
+	XCTAssertNotNil(refData);
+	XCTAssertNotNil(writtenData);
+	
+	XCTAssertEqualObjects(refData, writtenData);
+}
 
 - (void)testDetailedDataParsing
 {
@@ -132,7 +316,23 @@
 	XCTAssertEqualObjects(iparsedict5, irefdict5);
 }
 
+
 #pragma mark - Helpers
+
+- (NSString *)generateTempFilePath
+{
+	return [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"com.sourcemac.vmx-test-%@", [NSUUID UUID].UUIDString]];
+}
+
+- (SMVMwareVMX *)vmxForFile:(NSString *)file error:(SMError **)error
+{
+	NSBundle *bundle = [NSBundle bundleForClass:self.class];
+	NSString *path = [bundle pathForResource:file ofType:@"vmx"];
+	
+	assert(path);
+	
+	return SMVMwareVMXCreate(path.fileSystemRepresentation, error);
+}
 
 - (NSDictionary *)dictionaryFromFields:(SMDetailedField *)fields freeFields:(BOOL)freeFields
 {
@@ -153,6 +353,60 @@
 		SMDetailedFieldsFree(fields);
 	
 	return result;
+}
+
+- (void)validateEntriesOfVMX:(SMVMwareVMX *)vmx withTestEntries:(SMVMXEntryTest *)testEntries count:(size_t)count
+{
+	// Check number of entries.
+	XCTAssertEqual(SMVMwareVMXEntriesCount(vmx), count, "count mistmatch");
+	
+	// Check content.
+	for (size_t i = 0; i < SMVMwareVMXEntriesCount(vmx); i++)
+	{
+		SMVMwareVMXEntry	*entry = SMVMwareVMXGetEntryAtIndex(vmx, i);
+		SMVMXEntryTest		*testEntry = &testEntries[i];
+		SMError				*error = NULL;
+		
+		XCTAssertEqual(SMVMwareVMXEntryGetType(entry), testEntry->type);
+		
+		switch (testEntry->type)
+		{
+			case SMVMwareVMXEntryTypeEmpty:
+				break;
+				
+			case SMVMwareVMXEntryTypeComment:
+			{
+				const char *comment = SMVMwareVMXEntryGetComment(entry, &error);
+				
+				XCTAssertTrue(comment != NULL, @"unable to get comment: %s", SMErrorGetUserInfo(error));
+				SMErrorFree(error);
+				
+				XCTAssertEqualStrings(comment, testEntry->value);
+				
+				break;
+			}
+				
+			case SMVMwareVMXEntryTypeKeyValue:
+			{
+				const char *key = SMVMwareVMXEntryGetKey(entry, &error);
+				
+				XCTAssertTrue(key != NULL, @"unable to get key: %s", SMErrorGetUserInfo(error));
+				SMErrorFree(error);
+
+				const char *value = SMVMwareVMXEntryGetValue(entry, &error);
+				
+				XCTAssertTrue(value != NULL, @"unable to get value: %s", SMErrorGetUserInfo(error));
+				SMErrorFree(error);
+
+				
+				XCTAssertEqualStrings(key, testEntry->key);
+				XCTAssertEqualStrings(value, testEntry->value);
+				
+				break;
+			}
+		}
+	}
+	
 }
 
 

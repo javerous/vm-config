@@ -33,6 +33,7 @@
 #include "SMVMwareVMX.h"
 
 #include "SMStringHelper.h"
+#include "SMBytesWritter.h"
 
 
 /*
@@ -333,41 +334,128 @@ static SMVMwareVMXEntry * SMVMwareVMXEntryCreateFromLine(const char *line, size_
 		result->type = SMVMwareVMXEntryTypeComment;
 
 		line++;
-
+		
 		result->original_comment = SMStringTrimCharacter((char *)line, gBlanckCharacters, sizeof(gBlanckCharacters), false);
 	}
 	else
 	{
 		result->type = SMVMwareVMXEntryTypeKeyValue;
-
-		const char *line_bck = line;
 		
-		// > Search delimiter.
-		while (*line && *line != '=')
+		// Extract key.
+		SMBytesWritter key_writter = SMBytesWritterInit();
+		
+		// > Extract until we find a character which can terminate a key.
+		while (*line && !isblank(*line) && *line != '=')
+		{
+			SMBytesWritterAppendByte(&key_writter, *line);
 			line++;
+		}
 		
+		// > Check we are not end-of-line.
 		if (*line == 0)
 		{
-			SMSetErrorPtr(error, SMVMwareVMXErrorDomain, -1, "no = found at line %lu", line_idx + 1);
+			SMBytesWritterFree(&key_writter);
+			SMSetErrorPtr(error, SMVMwareVMXErrorDomain, -1, "unexpected end-of-line when parsing key at line %lu", line_idx + 1);
+			
 			goto fail;
 		}
 		
-		// > Handle key.
-		char *key = SMStringDuplicate(line_bck, (line - line_bck));
+		// > Add terminal 0.
+		SMBytesWritterAppendByte(&key_writter, 0);
 		
-		key = SMStringTrimCharacter(key, gBlanckCharacters, sizeof(gBlanckCharacters), true);
-
-		result->original_key = key;
 		
-		// > Handle value.
-		// > XXX We don't validate that the value is well delimited with " Do we care ? We are not a pedantic validator...).
-		// >     But it probably needs a more robust parsing anyway.
-		char value_trim[] = { ' ', '\t', '"' };
-		char *value = SMStringTrimCharacter((char *)line + 1, value_trim, sizeof(value_trim), false);
+		// Search key-value separator.
+		// > Skip potential white characters between end of key, and key-value separator.
+		while (*line && isblank(*line))
+			line++;
 		
-		value = SMStringReplaceString(value, "\\\"", "\"", true);
+		// > Check we are not end-of-line.
+		if (*line == 0)
+		{
+			SMBytesWritterFree(&key_writter);
+			SMSetErrorPtr(error, SMVMwareVMXErrorDomain, -1, "unexpected end-of-line when searching key-value separator at line %lu", line_idx + 1);
+			
+			goto fail;
+		}
 		
-		result->original_value = value;
+		// > Check we are stopped at key-value separator.
+		if (*line != '=')
+		{
+			SMBytesWritterFree(&key_writter);
+			SMSetErrorPtr(error, SMVMwareVMXErrorDomain, -1, "unexpected character '%c' when searching key-value separator at line %lu", *line, line_idx + 1);
+			
+			goto fail;
+		}
+		
+		// > Skip the key-value separator.
+		line++;
+		
+		
+		// Search value.
+		// > Skip potential white characters between key-value separator and value.
+		while (*line && isblank(*line))
+			line++;
+		
+		// > Check we are not end-of-line.
+		if (*line == 0)
+		{
+			SMBytesWritterFree(&key_writter);
+			SMSetErrorPtr(error, SMVMwareVMXErrorDomain, -1, "unexpected end-of-line when searching value at line %lu", line_idx + 1);
+			
+			goto fail;
+		}
+		
+		// > Check we have value delimiter.
+		if (*line != '"')
+		{
+			SMBytesWritterFree(&key_writter);
+			SMSetErrorPtr(error, SMVMwareVMXErrorDomain, -1, "unexpected character '%c' when searching value at line %lu", *line, line_idx + 1);
+			
+			goto fail;
+		}
+		
+		// > Skip value delimiter.
+		line++;
+		
+		// Extract value.
+		SMBytesWritter value_writter = SMBytesWritterInit();
+		
+		bool last_escaped = false;
+		bool value_extracting = true;
+		
+		for (; *line && value_extracting; line++)
+		{
+			if (last_escaped)
+			{
+				SMBytesWritterAppendByte(&value_writter, *line);
+				last_escaped = false;
+			}
+			else
+			{
+				if (*line == '\\')
+					last_escaped = true;
+				else if (*line == '"')
+					value_extracting = false;
+				else
+					SMBytesWritterAppendByte(&value_writter, *line);
+			}
+		}
+		
+		if (*line == 0 && value_extracting)
+		{
+			SMSetErrorPtr(error, SMVMwareVMXErrorDomain, -1, "unexpected end-of-line when parsing value at line %lu", line_idx + 1);
+			
+			SMBytesWritterFree(&key_writter);
+			SMBytesWritterFree(&value_writter);
+			
+			goto fail;
+		}
+		
+		SMBytesWritterAppendByte(&value_writter, 0);
+		
+		// Store result.
+		result->original_key = SMBytesWritterPtr(&key_writter);
+		result->original_value = SMBytesWritterPtr(&value_writter);
 	}
 	
 	return result;

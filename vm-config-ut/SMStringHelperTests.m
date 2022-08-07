@@ -24,21 +24,7 @@
 
 #import "SMStringHelper.h"
 
-
-/*
-** Defines
-*/
-#pragma mark - Defines
-
-#define XCTAssertEqualStrings(FreeableString, ReferenceString) ({	\
-	char		*__freeable_str = (FreeableString);					\
-	const char	*__ref_str = (ReferenceString);						\
-	int			__result = strcmp(__freeable_str, __ref_str);		\
-																	\
-	free(__freeable_str);											\
-																	\
-	XCTAssertEqual(__result, 0);									\
-})
+#import "SMTestsTools.h"
 
 
 /*
@@ -54,60 +40,65 @@
 
 - (void)testStringDuplicate
 {
-	XCTAssertEqualStrings(SMStringDuplicate("toto", 4), "toto");
-	XCTAssertEqualStrings(SMStringDuplicate("toto", 3), "tot");
-	XCTAssertEqualStrings(SMStringDuplicate("toto", 0), "");
+	XCTAssertEqualFreeableStrings(SMStringDuplicate("toto", 4), "toto");
+	XCTAssertEqualFreeableStrings(SMStringDuplicate("toto", 3), "tot");
+	XCTAssertEqualFreeableStrings(SMStringDuplicate("toto", 0), "");
 }
 
 - (void)testStringTrimCharacter
 {
 	char spaces[] = { ' ' };
 	char spaces_plus[] = { ' ', '+' };
+	char spaces_nl[] = { ' ', '\t', '\n' };
 
-	XCTAssertEqualStrings(SMStringTrimCharacter(" abcd", spaces, sizeof(spaces), false), "abcd");
-	XCTAssertEqualStrings(SMStringTrimCharacter("   abcd", spaces, sizeof(spaces), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter(" abcd", spaces, sizeof(spaces), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("   abcd", spaces, sizeof(spaces), false), "abcd");
 	
-	XCTAssertEqualStrings(SMStringTrimCharacter("abcd ", spaces, sizeof(spaces), false), "abcd");
-	XCTAssertEqualStrings(SMStringTrimCharacter("abcd   ", spaces, sizeof(spaces), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("abcd ", spaces, sizeof(spaces), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("abcd   ", spaces, sizeof(spaces), false), "abcd");
 	
-	XCTAssertEqualStrings(SMStringTrimCharacter(" abcd ", spaces, sizeof(spaces), false), "abcd");
-	XCTAssertEqualStrings(SMStringTrimCharacter("   abcd   ", spaces, sizeof(spaces), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter(" abcd ", spaces, sizeof(spaces), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("   abcd   ", spaces, sizeof(spaces), false), "abcd");
 
-	XCTAssertEqualStrings(SMStringTrimCharacter("++++abcd", spaces_plus, sizeof(spaces_plus), false), "abcd");
-	XCTAssertEqualStrings(SMStringTrimCharacter("++++abcd    ", spaces_plus, sizeof(spaces_plus), false), "abcd");
-	XCTAssertEqualStrings(SMStringTrimCharacter("++++  abcd+++ ", spaces_plus, sizeof(spaces_plus), false), "abcd");
-	XCTAssertEqualStrings(SMStringTrimCharacter("+ +  ++  abcd  +++   +    +", spaces_plus, sizeof(spaces_plus), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("++++abcd", spaces_plus, sizeof(spaces_plus), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("++++abcd    ", spaces_plus, sizeof(spaces_plus), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("++++  abcd+++ ", spaces_plus, sizeof(spaces_plus), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("+ +  ++  abcd  +++   +    +", spaces_plus, sizeof(spaces_plus), false), "abcd");
 	
-	XCTAssertEqualStrings(SMStringTrimCharacter("abcd", spaces_plus, sizeof(spaces_plus), false), "abcd");
-	XCTAssertEqualStrings(SMStringTrimCharacter("", spaces_plus, sizeof(spaces_plus), false), "");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("abcd", spaces_plus, sizeof(spaces_plus), false), "abcd");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("", spaces_plus, sizeof(spaces_plus), false), "");
 
-	XCTAssertEqualStrings(SMStringTrimCharacter("ab cd ef    gh", spaces, sizeof(spaces), false), "ab cd ef    gh");
-	XCTAssertEqualStrings(SMStringTrimCharacter("ab cd ef    gh    ", spaces, sizeof(spaces), false), "ab cd ef    gh");
-	XCTAssertEqualStrings(SMStringTrimCharacter("    ab cd ef    gh", spaces, sizeof(spaces), false), "ab cd ef    gh");
-	XCTAssertEqualStrings(SMStringTrimCharacter("    ab cd ef    gh    ", spaces, sizeof(spaces), false), "ab cd ef    gh");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("ab cd ef    gh", spaces, sizeof(spaces), false), "ab cd ef    gh");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("ab cd ef    gh    ", spaces, sizeof(spaces), false), "ab cd ef    gh");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("    ab cd ef    gh", spaces, sizeof(spaces), false), "ab cd ef    gh");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("    ab cd ef    gh    ", spaces, sizeof(spaces), false), "ab cd ef    gh");
+	
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("#\n", spaces_nl, sizeof(spaces_nl), false), "#");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("    ", spaces, sizeof(spaces), false), "");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter(" ", spaces, sizeof(spaces), false), "");
 }
 
 - (void)testStringReplaceString
 {
-	XCTAssertEqualStrings(SMStringReplaceString("hello world", "", "nothing", false), "hello world");
-	XCTAssertEqualStrings(SMStringReplaceString("hello world, beautiful world", "world", "", false), "hello , beautiful ");
+	XCTAssertEqualFreeableStrings(SMStringReplaceString("hello world", "", "nothing", false), "hello world");
+	XCTAssertEqualFreeableStrings(SMStringReplaceString("hello world, beautiful world", "world", "", false), "hello , beautiful ");
 	
-	XCTAssertEqualStrings(SMStringReplaceString("hello world, beautiful world", "world", "people", false), "hello people, beautiful people");
+	XCTAssertEqualFreeableStrings(SMStringReplaceString("hello world, beautiful world", "world", "people", false), "hello people, beautiful people");
 	
-	XCTAssertEqualStrings(SMStringReplaceString("", "world", "people", false), "");
+	XCTAssertEqualFreeableStrings(SMStringReplaceString("", "world", "people", false), "");
 	
-	XCTAssertEqualStrings(SMStringReplaceString("hello world", "toto", "tutu", false), "hello world");
+	XCTAssertEqualFreeableStrings(SMStringReplaceString("hello world", "toto", "tutu", false), "hello world");
 }
 
 - (void)testPathAppendComponent
 {
-	XCTAssertEqualStrings(SMStringPathAppendComponent("", "hello"), "/hello");
-	XCTAssertEqualStrings(SMStringPathAppendComponent("", ""), "");
-	XCTAssertEqualStrings(SMStringPathAppendComponent("/welcome", ""), "/welcome");
-	XCTAssertEqualStrings(SMStringPathAppendComponent("/welcome///", "///world"), "/welcome/world");
-	XCTAssertEqualStrings(SMStringPathAppendComponent("/welcome", "///world"), "/welcome/world");
-	XCTAssertEqualStrings(SMStringPathAppendComponent("/welcome/", "world"), "/welcome/world");
-	XCTAssertEqualStrings(SMStringPathAppendComponent("/welcome", "world"), "/welcome/world");
+	XCTAssertEqualFreeableStrings(SMStringPathAppendComponent("", "hello"), "/hello");
+	XCTAssertEqualFreeableStrings(SMStringPathAppendComponent("", ""), "");
+	XCTAssertEqualFreeableStrings(SMStringPathAppendComponent("/welcome", ""), "/welcome");
+	XCTAssertEqualFreeableStrings(SMStringPathAppendComponent("/welcome///", "///world"), "/welcome/world");
+	XCTAssertEqualFreeableStrings(SMStringPathAppendComponent("/welcome", "///world"), "/welcome/world");
+	XCTAssertEqualFreeableStrings(SMStringPathAppendComponent("/welcome/", "world"), "/welcome/world");
+	XCTAssertEqualFreeableStrings(SMStringPathAppendComponent("/welcome", "world"), "/welcome/world");
 }
 
 - (void)testPathHasExtension

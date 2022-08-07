@@ -7,8 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E8296BF0289C24AE0006DDDB /* SMBytesWritter.c in Sources */ = {isa = PBXBuildFile; fileRef = E8296BEF289C24AE0006DDDB /* SMBytesWritter.c */; };
-		E8296BF1289C24AE0006DDDB /* SMBytesWritter.c in Sources */ = {isa = PBXBuildFile; fileRef = E8296BEF289C24AE0006DDDB /* SMBytesWritter.c */; };
+		E828F1BB28A073F3008C27DD /* chaotic-1.vmx in Resources */ = {isa = PBXBuildFile; fileRef = E828F1BA28A073F3008C27DD /* chaotic-1.vmx */; };
+		E828F1BD28A07C54008C27DD /* fail-1.vmx in Resources */ = {isa = PBXBuildFile; fileRef = E828F1BC28A07C54008C27DD /* fail-1.vmx */; };
+		E828F1BF28A07D56008C27DD /* fail-2.vmx in Resources */ = {isa = PBXBuildFile; fileRef = E828F1BE28A07D55008C27DD /* fail-2.vmx */; };
+		E828F1C128A07E5A008C27DD /* fail-3.vmx in Resources */ = {isa = PBXBuildFile; fileRef = E828F1C028A07E59008C27DD /* fail-3.vmx */; };
+		E828F1C328A08195008C27DD /* fail-4.vmx in Resources */ = {isa = PBXBuildFile; fileRef = E828F1C228A08194008C27DD /* fail-4.vmx */; };
 		E8296BF6289C31530006DDDB /* SMVMwareVMXTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8296BF5289C31530006DDDB /* SMVMwareVMXTests.m */; };
 		E8296BF8289C319F0006DDDB /* SMBytesWritterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8296BF7289C319F0006DDDB /* SMBytesWritterTests.m */; };
 		E8518030289C42AB00B78B58 /* SMVMwareVMXHelper.c in Sources */ = {isa = PBXBuildFile; fileRef = E8B70ED728985F6200903682 /* SMVMwareVMXHelper.c */; };
@@ -28,6 +31,7 @@
 		E8BB3BA72895A31D00E57C3A /* SMVMwareNVRAM.c in Sources */ = {isa = PBXBuildFile; fileRef = E8BB3BA62895A31D00E57C3A /* SMVMwareNVRAM.c */; };
 		E8BB3BAA2895A33200E57C3A /* SMError.c in Sources */ = {isa = PBXBuildFile; fileRef = E8BB3BA92895A33200E57C3A /* SMError.c */; };
 		E8BB3BAD2895DE1100E57C3A /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E8BB3BAC2895DE1100E57C3A /* libiconv.tbd */; };
+		E8C510B5289F3CD0000D8F2E /* basic-1.vmx in Resources */ = {isa = PBXBuildFile; fileRef = E8C510B4289F3CCF000D8F2E /* basic-1.vmx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,9 +47,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E828F1BA28A073F3008C27DD /* chaotic-1.vmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "chaotic-1.vmx"; path = "resources/chaotic-1.vmx"; sourceTree = "<group>"; };
+		E828F1BC28A07C54008C27DD /* fail-1.vmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "fail-1.vmx"; path = "resources/fail-1.vmx"; sourceTree = "<group>"; };
+		E828F1BE28A07D55008C27DD /* fail-2.vmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "fail-2.vmx"; path = "resources/fail-2.vmx"; sourceTree = "<group>"; };
+		E828F1C028A07E59008C27DD /* fail-3.vmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "fail-3.vmx"; path = "resources/fail-3.vmx"; sourceTree = "<group>"; };
+		E828F1C228A08194008C27DD /* fail-4.vmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "fail-4.vmx"; path = "resources/fail-4.vmx"; sourceTree = "<group>"; };
 		E8296B76289BD9450006DDDB /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		E8296BEE289C24AE0006DDDB /* SMBytesWritter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMBytesWritter.h; sourceTree = "<group>"; };
-		E8296BEF289C24AE0006DDDB /* SMBytesWritter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SMBytesWritter.c; sourceTree = "<group>"; };
 		E8296BF5289C31530006DDDB /* SMVMwareVMXTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMVMwareVMXTests.m; sourceTree = "<group>"; };
 		E8296BF7289C319F0006DDDB /* SMBytesWritterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMBytesWritterTests.m; sourceTree = "<group>"; };
 		E887A83128982FED008C59F2 /* SMVMwareVMX.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMVMwareVMX.h; sourceTree = "<group>"; };
@@ -69,6 +77,8 @@
 		E8BB3BA82895A33200E57C3A /* SMError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMError.h; sourceTree = "<group>"; };
 		E8BB3BA92895A33200E57C3A /* SMError.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SMError.c; sourceTree = "<group>"; };
 		E8BB3BAC2895DE1100E57C3A /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		E8C510B4289F3CCF000D8F2E /* basic-1.vmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "basic-1.vmx"; path = "resources/basic-1.vmx"; sourceTree = "<group>"; };
+		E8C510B8289F41FE000D8F2E /* SMTestsTools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMTestsTools.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,7 +126,6 @@
 				E8B70EDB28987ED600903682 /* SMStringHelper.h */,
 				E8B70EDC28987ED600903682 /* SMStringHelper.c */,
 				E8296BEE289C24AE0006DDDB /* SMBytesWritter.h */,
-				E8296BEF289C24AE0006DDDB /* SMBytesWritter.c */,
 			);
 			name = tools;
 			sourceTree = "<group>";
@@ -124,11 +133,8 @@
 		E8B70EE3289882F100903682 /* vm-config-ut */ = {
 			isa = PBXGroup;
 			children = (
-				E8296BF7289C319F0006DDDB /* SMBytesWritterTests.m */,
-				E8A37482289D45C700FA3EDA /* SMErrorTests.m */,
-				E8B70EE92898831500903682 /* SMStringHelperTests.m */,
-				E8A23993289AF8850076A869 /* SMVersionTests.m */,
-				E8296BF5289C31530006DDDB /* SMVMwareVMXTests.m */,
+				E8C510B6289F41D1000D8F2E /* tests */,
+				E8C510B7289F41DD000D8F2E /* tools */,
 			);
 			path = "vm-config-ut";
 			sourceTree = "<group>";
@@ -170,6 +176,40 @@
 				E8BB3BAC2895DE1100E57C3A /* libiconv.tbd */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E8C510B3289F3CB2000D8F2E /* vmx */ = {
+			isa = PBXGroup;
+			children = (
+				E8296BF5289C31530006DDDB /* SMVMwareVMXTests.m */,
+				E8C510B4289F3CCF000D8F2E /* basic-1.vmx */,
+				E828F1BA28A073F3008C27DD /* chaotic-1.vmx */,
+				E828F1BC28A07C54008C27DD /* fail-1.vmx */,
+				E828F1BE28A07D55008C27DD /* fail-2.vmx */,
+				E828F1C028A07E59008C27DD /* fail-3.vmx */,
+				E828F1C228A08194008C27DD /* fail-4.vmx */,
+			);
+			name = vmx;
+			sourceTree = "<group>";
+		};
+		E8C510B6289F41D1000D8F2E /* tests */ = {
+			isa = PBXGroup;
+			children = (
+				E8296BF7289C319F0006DDDB /* SMBytesWritterTests.m */,
+				E8A37482289D45C700FA3EDA /* SMErrorTests.m */,
+				E8B70EE92898831500903682 /* SMStringHelperTests.m */,
+				E8A23993289AF8850076A869 /* SMVersionTests.m */,
+				E8C510B3289F3CB2000D8F2E /* vmx */,
+			);
+			name = tests;
+			sourceTree = "<group>";
+		};
+		E8C510B7289F41DD000D8F2E /* tools */ = {
+			isa = PBXGroup;
+			children = (
+				E8C510B8289F41FE000D8F2E /* SMTestsTools.h */,
+			);
+			name = tools;
 			sourceTree = "<group>";
 		};
 		E8EEAB88289C6EAE0012C596 /* vmx */ = {
@@ -272,6 +312,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E828F1C328A08195008C27DD /* fail-4.vmx in Resources */,
+				E828F1BD28A07C54008C27DD /* fail-1.vmx in Resources */,
+				E8C510B5289F3CD0000D8F2E /* basic-1.vmx in Resources */,
+				E828F1BF28A07D56008C27DD /* fail-2.vmx in Resources */,
+				E828F1C128A07E5A008C27DD /* fail-3.vmx in Resources */,
+				E828F1BB28A073F3008C27DD /* chaotic-1.vmx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -292,7 +338,6 @@
 				E8A23995289AFAD10076A869 /* SMError.c in Sources */,
 				E8A23994289AF8850076A869 /* SMVersionTests.m in Sources */,
 				E8A23992289AF1D30076A869 /* SMVersion.c in Sources */,
-				E8296BF1289C24AE0006DDDB /* SMBytesWritter.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,7 +347,6 @@
 			files = (
 				E8A23991289AF1D30076A869 /* SMVersion.c in Sources */,
 				E8ACE2ED289710230081B933 /* SMVMwareNVRAMHelper.c in Sources */,
-				E8296BF0289C24AE0006DDDB /* SMBytesWritter.c in Sources */,
 				E887A83328982FED008C59F2 /* SMVMwareVMX.c in Sources */,
 				E8B70EDD28987ED600903682 /* SMStringHelper.c in Sources */,
 				E8BB3BAA2895A33200E57C3A /* SMError.c in Sources */,
