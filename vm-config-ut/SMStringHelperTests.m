@@ -64,7 +64,8 @@
 	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("++++abcd    ", spaces_plus, sizeof(spaces_plus), false), "abcd");
 	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("++++  abcd+++ ", spaces_plus, sizeof(spaces_plus), false), "abcd");
 	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("+ +  ++  abcd  +++   +    +", spaces_plus, sizeof(spaces_plus), false), "abcd");
-	
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("+ +  ++    +++   +    +", spaces_plus, sizeof(spaces_plus), false), "");
+
 	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("abcd", spaces_plus, sizeof(spaces_plus), false), "abcd");
 	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("", spaces_plus, sizeof(spaces_plus), false), "");
 
@@ -76,6 +77,9 @@
 	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("#\n", spaces_nl, sizeof(spaces_nl), false), "#");
 	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("    ", spaces, sizeof(spaces), false), "");
 	XCTAssertEqualFreeableStrings(SMStringTrimCharacter(" ", spaces, sizeof(spaces), false), "");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("", spaces, sizeof(spaces), false), "");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter(" a", spaces, sizeof(spaces), false), "a");
+	XCTAssertEqualFreeableStrings(SMStringTrimCharacter("a ", spaces, sizeof(spaces), false), "a");
 }
 
 - (void)testStringReplaceString

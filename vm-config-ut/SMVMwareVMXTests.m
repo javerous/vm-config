@@ -222,6 +222,69 @@ typedef struct
 	XCTAssertEqualObjects(refData, writtenData);
 }
 
+- (void)testModifications
+{
+	SMError *error = NULL;
+
+	// Parse file.
+	SMVMwareVMX *vmxOriginal = [self vmxForFile:@"basic-1" error:&error];
+	
+	XCTAssert(vmxOriginal, @"failed to parse file: %s", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmxOriginal);
+	};
+	
+	// Fetch entries.
+	SMVMwareVMXEntry *entry1 = SMVMwareVMXGetEntryForKey(vmxOriginal, ".encoding");
+	SMVMwareVMXEntry *entry2 = SMVMwareVMXGetEntryForKey(vmxOriginal, "displayName");
+	SMVMwareVMXEntry *entry3 = SMVMwareVMXGetEntryForKey(vmxOriginal, "config.version");
+	SMVMwareVMXEntry *entry4 = SMVMwareVMXGetEntryForKey(vmxOriginal, "pciBridge0.present");
+
+	XCTAssertNotEqual(entry1, NULL);
+	XCTAssertNotEqual(entry2, NULL);
+	XCTAssertNotEqual(entry3, NULL);
+	XCTAssertNotEqual(entry4, NULL);
+
+	// Modify entries.
+	XCTAssertTrue(SMVMwareVMXEntrySetKey(entry1, "key1", &error), "failed to set key: %s", SMErrorGetUserInfo(error));
+	XCTAssertTrue(SMVMwareVMXEntrySetValue(entry2, "simplevalue", &error), "failed to set value: %s", SMErrorGetUserInfo(error));
+	XCTAssertTrue(SMVMwareVMXEntrySetValue(entry3, "value with spaces", &error), "failed to set value: %s", SMErrorGetUserInfo(error));
+	XCTAssertTrue(SMVMwareVMXEntrySetValue(entry4, "test \"a value\"", &error), "failed to set value: %s", SMErrorGetUserInfo(error));
+
+	// Write modified file.
+	NSString *modifiedFile = [self generateTempFilePath];
+	
+	XCTAssertTrue(SMVMwareVMXWriteToFile(vmxOriginal, modifiedFile.fileSystemRepresentation, &error), "failed to write file: %s", SMErrorGetUserInfo(error));
+	
+	// Open modified file.
+	SMVMwareVMX *vmxReopen = SMVMwareVMXOpen(modifiedFile.fileSystemRepresentation, &error);
+	
+	XCTAssertNotEqual(entry1, NULL, "failed to re-open modified file: %s", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmxReopen);
+		[[NSFileManager defaultManager] removeItemAtPath:modifiedFile error:nil];
+	};
+	
+	// Validate content
+	SMVMXEntryTest testEntries[] = {
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "key1", .value = "UTF-8" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "displayName", .value = "simplevalue" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "config.version", .value = "value with spaces" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "pciBridge0.present", .value = "test \"a value\"" },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "guestOS", .value = "darwin19-64" },
+		{ .type = SMVMwareVMXEntryTypeEmpty },
+		{ .type = SMVMwareVMXEntryTypeComment, .value = "A comment" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "firmware", .value = "efi" },
+	};
+	
+	[self validateEntriesOfVMX:vmxReopen withTestEntries:testEntries count:sizeof(testEntries) / sizeof(*testEntries)];
+}
+
+
 - (void)testDetailedDataParsing
 {
 	// Valid 1.
@@ -331,7 +394,7 @@ typedef struct
 	
 	assert(path);
 	
-	return SMVMwareVMXCreate(path.fileSystemRepresentation, error);
+	return SMVMwareVMXOpen(path.fileSystemRepresentation, error);
 }
 
 - (NSDictionary *)dictionaryFromFields:(SMDetailedField *)fields freeFields:(BOOL)freeFields
@@ -378,7 +441,7 @@ typedef struct
 			{
 				const char *comment = SMVMwareVMXEntryGetComment(entry, &error);
 				
-				XCTAssertTrue(comment != NULL, @"unable to get comment: %s", SMErrorGetUserInfo(error));
+				XCTAssertTrue(comment != NULL, @"failed to get comment: %s", SMErrorGetUserInfo(error));
 				SMErrorFree(error);
 				
 				XCTAssertEqualStrings(comment, testEntry->value);
@@ -390,12 +453,12 @@ typedef struct
 			{
 				const char *key = SMVMwareVMXEntryGetKey(entry, &error);
 				
-				XCTAssertTrue(key != NULL, @"unable to get key: %s", SMErrorGetUserInfo(error));
+				XCTAssertTrue(key != NULL, @"failed to get key: %s", SMErrorGetUserInfo(error));
 				SMErrorFree(error);
 
 				const char *value = SMVMwareVMXEntryGetValue(entry, &error);
 				
-				XCTAssertTrue(value != NULL, @"unable to get value: %s", SMErrorGetUserInfo(error));
+				XCTAssertTrue(value != NULL, @"failed to get value: %s", SMErrorGetUserInfo(error));
 				SMErrorFree(error);
 
 				

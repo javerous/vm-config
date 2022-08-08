@@ -117,7 +117,7 @@ static bool SMFileWriteBytes(int fd, const void *bytes, size_t len, SMError **er
 
 #pragma mark > Instance
 
-SMVMwareVMX * SMVMwareVMXCreate(const char *vmx_file_path, SMError **error)
+SMVMwareVMX * SMVMwareVMXOpen(const char *vmx_file_path, SMError **error)
 {
 	SMVMwareVMX *result = calloc(1, sizeof(SMVMwareVMX));
 	
