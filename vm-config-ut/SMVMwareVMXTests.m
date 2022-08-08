@@ -240,17 +240,26 @@ typedef struct
 	SMVMwareVMXEntry *entry2 = SMVMwareVMXGetEntryForKey(vmxOriginal, "displayName");
 	SMVMwareVMXEntry *entry3 = SMVMwareVMXGetEntryForKey(vmxOriginal, "config.version");
 	SMVMwareVMXEntry *entry4 = SMVMwareVMXGetEntryForKey(vmxOriginal, "pciBridge0.present");
+	SMVMwareVMXEntry *entry5 = SMVMwareVMXGetEntryAtIndex(vmxOriginal, 8);
 
 	XCTAssertNotEqual(entry1, NULL);
 	XCTAssertNotEqual(entry2, NULL);
 	XCTAssertNotEqual(entry3, NULL);
 	XCTAssertNotEqual(entry4, NULL);
+	
+	// Check entries.
+	XCTAssertEqual(SMVMwareVMXEntryGetType(entry1), SMVMwareVMXEntryTypeKeyValue);
+	XCTAssertEqual(SMVMwareVMXEntryGetType(entry2), SMVMwareVMXEntryTypeKeyValue);
+	XCTAssertEqual(SMVMwareVMXEntryGetType(entry3), SMVMwareVMXEntryTypeKeyValue);
+	XCTAssertEqual(SMVMwareVMXEntryGetType(entry4), SMVMwareVMXEntryTypeKeyValue);
+	XCTAssertEqual(SMVMwareVMXEntryGetType(entry5), SMVMwareVMXEntryTypeComment);
 
 	// Modify entries.
 	XCTAssertTrue(SMVMwareVMXEntrySetKey(entry1, "key1", &error), "failed to set key: %s", SMErrorGetUserInfo(error));
 	XCTAssertTrue(SMVMwareVMXEntrySetValue(entry2, "simplevalue", &error), "failed to set value: %s", SMErrorGetUserInfo(error));
 	XCTAssertTrue(SMVMwareVMXEntrySetValue(entry3, "value with spaces", &error), "failed to set value: %s", SMErrorGetUserInfo(error));
 	XCTAssertTrue(SMVMwareVMXEntrySetValue(entry4, "test \"a value\"", &error), "failed to set value: %s", SMErrorGetUserInfo(error));
+	XCTAssertTrue(SMVMwareVMXEntrySetComment(entry5, "Hello World !", &error), "failed to set comment: %s", SMErrorGetUserInfo(error));
 
 	// Write modified file.
 	NSString *modifiedFile = [self generateTempFilePath];
@@ -277,7 +286,7 @@ typedef struct
 		{ .type = SMVMwareVMXEntryTypeEmpty },
 		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "guestOS", .value = "darwin19-64" },
 		{ .type = SMVMwareVMXEntryTypeEmpty },
-		{ .type = SMVMwareVMXEntryTypeComment, .value = "A comment" },
+		{ .type = SMVMwareVMXEntryTypeComment, .value = "Hello World !" },
 		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = "firmware", .value = "efi" },
 	};
 	
