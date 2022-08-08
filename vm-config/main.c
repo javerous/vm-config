@@ -969,7 +969,7 @@ static SMVMwareVMX * SMGetVMXFromVM(const char *vm_path, SMVMwareVMX **inoutVMX,
 		char *path = SMStringPathAppendComponent(vm_path, dp->d_name);
 		
 		
-		result = SMVMwareVMXCreate(path, error);
+		result = SMVMwareVMXOpen(path, error);
 		
 		free(path);
 		
@@ -1018,7 +1018,7 @@ static SMVMwareNVRAM * SMGetNVRAMFromVM(const char *vm_path, SMVMwareVMX **inout
 	// Forge NVRAM path.
 	char *path = SMStringPathAppendComponent(vm_path, name);
 		
-	result = SMVMwareNVRAMCreate(path, error);
+	result = SMVMwareNVRAMOpen(path, error);
 	
 	free(path);
 	

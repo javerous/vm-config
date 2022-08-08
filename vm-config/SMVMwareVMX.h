@@ -60,7 +60,7 @@ extern const char * SMVMwareVMXErrorDomain;
 
 // VMX.
 // > Instance.
-SMVMwareVMX *	SMVMwareVMXCreate(const char *vmx_file_path, SMError **error);
+SMVMwareVMX *	SMVMwareVMXOpen(const char *vmx_file_path, SMError **error);
 void			SMVMwareVMXFree(SMVMwareVMX *vmx);
 
 // > Properties.

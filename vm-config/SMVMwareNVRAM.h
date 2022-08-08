@@ -92,7 +92,7 @@ extern const char * SMVMwareNVRAMErrorDomain;
 
 // NVRAM.
 // > Instance.
-SMVMwareNVRAM *	SMVMwareNVRAMCreate(const char *nvram_file_path, SMError **error);
+SMVMwareNVRAM *	SMVMwareNVRAMOpen(const char *nvram_file_path, SMError **error);
 void			SMVMwareNVRAMFree(SMVMwareNVRAM *nvram);
 
 // > Properties.

@@ -237,7 +237,7 @@ static void * SMStringUTF8ToUTF16(const char *utf8str, bool terminal_zero, size_
 
 #pragma mark > Instance
 
-SMVMwareNVRAM * SMVMwareNVRAMCreate(const char *nvram_file_path, SMError **error)
+SMVMwareNVRAM * SMVMwareNVRAMOpen(const char *nvram_file_path, SMError **error)
 {
 	SMVMwareNVRAM *result = calloc(1, sizeof(SMVMwareNVRAM));
 	
