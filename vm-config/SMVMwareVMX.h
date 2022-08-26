@@ -75,6 +75,9 @@ SMVMwareVMXEntry *	SMVMwareVMXGetEntryAtIndex(SMVMwareVMX *vmx, size_t idx);
 
 SMVMwareVMXEntry *	SMVMwareVMXGetEntryForKey(SMVMwareVMX *vmx, const char *key);
 
+SMVMwareVMXEntry *	SMVMwareNVRAMEntryAddKeyValue(SMVMwareVMX *vmx, const char *key, const char *value, SMError **error);
+
+
 // Entry.
 // > Type.
 SMVMwareVMXEntryType SMVMwareVMXEntryGetType(SMVMwareVMXEntry *entry);

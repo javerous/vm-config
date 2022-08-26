@@ -97,6 +97,7 @@ static void SMVMwareVMXAddEntry(SMVMwareVMX *vmx, SMVMwareVMXEntry *entry);
 
 // Entry.
 // > Instance.
+static SMVMwareVMXEntry * 	SMVMwareVMXEntryCreateKeyValue(const char *key, const char *value, SMError **error);
 static SMVMwareVMXEntry *	SMVMwareVMXEntryCreateFromLine(const char *line, size_t line_idx, SMError **error);
 static void					SMVMwareVMXEntryFree(SMVMwareVMXEntry *entry);
 
@@ -306,6 +307,22 @@ SMVMwareVMXEntry * SMVMwareVMXGetEntryForKey(SMVMwareVMX *vmx, const char *key)
 	return NULL;
 }
 
+SMVMwareVMXEntry * SMVMwareNVRAMEntryAddKeyValue(SMVMwareVMX *vmx, const char *key, const char *value, SMError **error)
+{
+	// Create instance.
+	SMVMwareVMXEntry *entry = SMVMwareVMXEntryCreateKeyValue(key, value, error);
+	
+	if (!entry)
+		return NULL;
+	
+	// Add to entries.
+	SMVMwareVMXAddEntry(vmx, entry);
+	SMVMwareVMXEntryMarkUpdated(entry);
+	
+	// Return added entry.
+	return entry;
+}
+
 
 /*
 ** Entry
@@ -313,6 +330,27 @@ SMVMwareVMXEntry * SMVMwareVMXGetEntryForKey(SMVMwareVMX *vmx, const char *key)
 #pragma mark - Entry
 
 #pragma mark > Instance
+
+static SMVMwareVMXEntry * SMVMwareVMXEntryCreateKeyValue(const char *key, const char *value, SMError **error)
+{
+	SMVMwareVMXEntry *result = calloc(1, sizeof(SMVMwareVMXEntry));
+	
+	assert(result);
+
+	result->type = SMVMwareVMXEntryTypeKeyValue;
+	
+	if (!SMVMwareVMXEntrySetKey(result, key, error))
+		goto fail;
+	
+	if (!SMVMwareVMXEntrySetValue(result, value, error))
+		goto fail;
+	
+	return result;
+	
+fail:
+	SMVMwareVMXEntryFree(result);
+	return NULL;
+}
 
 static SMVMwareVMXEntry * SMVMwareVMXEntryCreateFromLine(const char *line, size_t line_idx, SMError **error)
 {

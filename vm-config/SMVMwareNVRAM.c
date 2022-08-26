@@ -761,7 +761,7 @@ SMVMwareNVRAMEFIVariable * SMVMwareNVRAMEntryAddVariable(SMVMwareNVRAMEntry *ent
 	if (!var)
 		return NULL;
 
-	// Add to entry.
+	// Add to entries.
 	SMVMwareNVRAMEntryAddVariableInternal(entry, var);
 	SMVMwareNVRAMEntryMarkUpdated(entry);
 

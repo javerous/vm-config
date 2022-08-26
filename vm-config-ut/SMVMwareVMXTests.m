@@ -22,6 +22,7 @@
 
 #import <XCTest/XCTest.h>
 
+#import "SMVMwareVMX.h"
 #import "SMVMwareVMXHelper.h"
 
 #import "SMTestsTools.h"
@@ -51,12 +52,15 @@ typedef struct
 
 @implementation SMVMwareVMXTests
 
-#pragma mark - Tests
+#pragma mark - XCTestCase
 
 - (void)setUp
 {
 	self.continueAfterFailure = NO;
 }
+
+
+#pragma mark - Tests
 
 - (void)testBasic1Parsing
 {
@@ -205,7 +209,7 @@ typedef struct
 	};
 	
 	// Write parsed file.
-	NSString *tempOutput = [self generateTempFilePath];
+	NSString *tempOutput = SMGenerateTemporaryTestPath();
 	
 	XCTAssertTrue(SMVMwareVMXWriteToFile(vmx, tempOutput.fileSystemRepresentation, &error), @"failed to write file: %s", SMErrorGetUserInfo(error));
 	
@@ -262,14 +266,14 @@ typedef struct
 	XCTAssertTrue(SMVMwareVMXEntrySetComment(entry5, "Hello World !", &error), "failed to set comment: %s", SMErrorGetUserInfo(error));
 
 	// Write modified file.
-	NSString *modifiedFile = [self generateTempFilePath];
+	NSString *modifiedFile = SMGenerateTemporaryTestPath();
 	
 	XCTAssertTrue(SMVMwareVMXWriteToFile(vmxOriginal, modifiedFile.fileSystemRepresentation, &error), "failed to write file: %s", SMErrorGetUserInfo(error));
 	
 	// Open modified file.
 	SMVMwareVMX *vmxReopen = SMVMwareVMXOpen(modifiedFile.fileSystemRepresentation, &error);
 	
-	XCTAssertNotEqual(entry1, NULL, "failed to re-open modified file: %s", SMErrorGetUserInfo(error));
+	XCTAssertNotEqual(vmxReopen, NULL, "failed to re-open modified file: %s", SMErrorGetUserInfo(error));
 	
 	_onExit {
 		SMVMwareVMXFree(vmxReopen);
@@ -293,6 +297,102 @@ typedef struct
 	[self validateEntriesOfVMX:vmxReopen withTestEntries:testEntries count:sizeof(testEntries) / sizeof(*testEntries)];
 }
 
+- (void)testMacOSVersion1
+{
+	SMError *error = NULL;
+
+	// Parse file.
+	SMVMwareVMX *vmx = [self vmxForFile:@"guestos-1" error:&error];
+	
+	XCTAssert(vmx, @"failed to parse file: %s", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmx);
+	};
+	
+	SMVersion version = SMVMwareVMXExtractMacOSVersion(vmx);
+	SMVersion version_ref = SMVersionFromComponents(10, 15, 0);
+	
+	XCTAssertTrue(SMVersionIsEqual(version, version_ref));
+}
+
+- (void)testMacOSVersion2
+{
+	SMError *error = NULL;
+
+	// Parse file.
+	SMVMwareVMX *vmx = [self vmxForFile:@"guestos-2" error:&error];
+	
+	XCTAssert(vmx, @"failed to parse file: %s", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmx);
+	};
+	
+	SMVersion version = SMVMwareVMXExtractMacOSVersion(vmx);
+	SMVersion version_ref = SMVersionFromComponents(10, 15, 7);
+	
+	XCTAssertTrue(SMVersionIsEqual(version, version_ref));
+}
+
+- (void)testSetMachineUUID
+{
+	SMError *error = NULL;
+	
+	// Parse file.
+	SMVMwareVMX *vmxOriginal = [self vmxForFile:@"empty-1" error:&error];
+	
+	XCTAssert(vmxOriginal, @"failed to parse file: %s", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmxOriginal);
+	};
+	
+	// Modify content.
+	uuid_t uuid1 = { 0xC8, 0x62, 0xD7, 0x75, 0x62, 0x3D, 0x42, 0x99, 0x82, 0x77, 0x96, 0xA6, 0x4A, 0x69, 0x6F, 0xD5 };
+	const char *uuidStr1 = "c8 62 d7 75 62 3d 42 99-82 77 96 a6 4a 69 6f d5";
+	SMVMXEntryTest testEntries1[] = {
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = ".encoding", .value = "UTF-8" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = SMVMwareVMXUUIDBiosKey, .value = uuidStr1 },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = SMVMwareVMXUUIDLocationKey, .value = uuidStr1 },
+	};
+	
+	XCTAssertTrue(SMVMwareVMXSetMachineUUID(vmxOriginal, uuid1, NULL));
+	
+	// Validate content.
+	[self validateEntriesOfVMX:vmxOriginal withTestEntries:testEntries1 count:sizeof(testEntries1) / sizeof(*testEntries1)];
+	
+	// Write modified file.
+	NSString *modifiedFile = SMGenerateTemporaryTestPath();
+	
+	XCTAssertTrue(SMVMwareVMXWriteToFile(vmxOriginal, modifiedFile.fileSystemRepresentation, &error), "failed to write file: %s", SMErrorGetUserInfo(error));
+	
+	// Open modified file.
+	SMVMwareVMX *vmxReopen = SMVMwareVMXOpen(modifiedFile.fileSystemRepresentation, &error);
+	
+	XCTAssertNotEqual(vmxReopen, NULL, "failed to re-open modified file: %s", SMErrorGetUserInfo(error));
+	
+	_onExit {
+		SMVMwareVMXFree(vmxReopen);
+		[[NSFileManager defaultManager] removeItemAtPath:modifiedFile error:nil];
+	};
+	
+	// Validate re-open.
+	[self validateEntriesOfVMX:vmxReopen withTestEntries:testEntries1 count:sizeof(testEntries1) / sizeof(*testEntries1)];
+	
+	// Change existing.
+	uuid_t uuid2 = { 0x84, 0xDE, 0x67, 0x52, 0xFB, 0xAA, 0x4C, 0x61, 0x9C, 0x05, 0xDF, 0x09, 0x92, 0x4F, 0x58, 0x36 };
+	const char *uuidStr2 = "84 de 67 52 fb aa 4c 61-9c 05 df 09 92 4f 58 36";
+	SMVMXEntryTest testEntries2[] = {
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = ".encoding", .value = "UTF-8" },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = SMVMwareVMXUUIDBiosKey, .value = uuidStr2 },
+		{ .type = SMVMwareVMXEntryTypeKeyValue, .key = SMVMwareVMXUUIDLocationKey, .value = uuidStr2 },
+	};
+	
+	XCTAssertTrue(SMVMwareVMXSetMachineUUID(vmxReopen, uuid2, NULL));
+	
+	[self validateEntriesOfVMX:vmxReopen withTestEntries:testEntries2 count:sizeof(testEntries2) / sizeof(*testEntries2)];
+}
 
 - (void)testDetailedDataParsing
 {
@@ -391,11 +491,6 @@ typedef struct
 
 #pragma mark - Helpers
 
-- (NSString *)generateTempFilePath
-{
-	return [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"com.sourcemac.vmx-test-%@", [NSUUID UUID].UUIDString]];
-}
-
 - (SMVMwareVMX *)vmxForFile:(NSString *)file error:(SMError **)error
 {
 	NSBundle *bundle = [NSBundle bundleForClass:self.class];
@@ -480,6 +575,5 @@ typedef struct
 	}
 	
 }
-
 
 @end
