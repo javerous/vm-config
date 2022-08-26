@@ -122,7 +122,7 @@ int main(int argc, const char * argv[])
 		
 		show_usage();
 		
-		return 1;
+		return 2;
 	}
 }
 
