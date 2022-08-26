@@ -51,3 +51,11 @@ static inline void _execBlock (__strong dispatch_block_t *block) {
 
 #define _onExit \
 	__strong dispatch_block_t __concat(_exitBlock_, __LINE__) __attribute__((cleanup(_execBlock), unused)) = ^
+
+
+// Paths.
+static __attribute__((always_inline)) inline
+NSString * SMGenerateTemporaryTestPath(void)
+{
+	return [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"com.sourcemac.ut-file-%@", [NSUUID UUID].UUIDString]];
+}

@@ -50,12 +50,6 @@ static uint32_t csr_version_3(bool enable, uint32_t current_csr);
 static uint32_t csr_version_4(bool enable, uint32_t current_csr);
 
 
-
-// Helpers.
-static SMVMwareNVRAMEntry * 		SMVMwareNVRAMVariablesEntry(SMVMwareNVRAM *nvram, SMError **error);
-static SMVMwareNVRAMEFIVariable *	SMVMwareNVRAMVariableForGUIDAndName(SMVMwareNVRAM *nvram, const efi_guid_t *guid, const char *name, SMError **error);
-
-
 /*
 ** Interface
 */
@@ -354,7 +348,7 @@ bool SMVMwareNVRAMSetAppleMachineUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError
 */
 #pragma mark Helpers
 
-static SMVMwareNVRAMEntry * SMVMwareNVRAMVariablesEntry(SMVMwareNVRAM *nvram, SMError **error)
+SMVMwareNVRAMEntry * SMVMwareNVRAMVariablesEntry(SMVMwareNVRAM *nvram, SMError **error)
 {
 	for (size_t i = 0; i < SMVMwareNVRAMEntriesCount(nvram); i++)
 	{
@@ -371,7 +365,7 @@ static SMVMwareNVRAMEntry * SMVMwareNVRAMVariablesEntry(SMVMwareNVRAM *nvram, SM
 }
 
 
-static SMVMwareNVRAMEFIVariable * SMVMwareNVRAMVariableForGUIDAndName(SMVMwareNVRAM *nvram, const efi_guid_t *guid, const char *name, SMError **error)
+SMVMwareNVRAMEFIVariable * SMVMwareNVRAMVariableForGUIDAndName(SMVMwareNVRAM *nvram, const efi_guid_t *guid, const char *name, SMError **error)
 {
 	SMVMwareNVRAMEntry *entry = SMVMwareNVRAMVariablesEntry(nvram, error);
 

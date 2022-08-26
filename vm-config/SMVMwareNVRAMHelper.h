@@ -141,3 +141,7 @@ bool SMVMwareNVRAMSetAppleMachineUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError
 
 // Screen Resolution.
 bool SMVMwareNVRAMSetScreenResolution(SMVMwareNVRAM *nvram, uint32_t width, uint32_t height, SMError **error);
+
+// Helpers.
+SMVMwareNVRAMEntry * SMVMwareNVRAMVariablesEntry(SMVMwareNVRAM *nvram, SMError **error);
+SMVMwareNVRAMEFIVariable * SMVMwareNVRAMVariableForGUIDAndName(SMVMwareNVRAM *nvram, const efi_guid_t *guid, const char *name, SMError **error);

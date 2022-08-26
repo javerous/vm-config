@@ -40,10 +40,6 @@ bool SMVMwareVMXSetMachineUUID(SMVMwareVMX *vmx, uuid_t uuid, SMError **error)
 {
 	SMVMwareVMXEntry *uuid_bios_entry = SMVMwareVMXGetEntryForKey(vmx, SMVMwareVMXUUIDBiosKey);
 	SMVMwareVMXEntry *uuid_location_entry = SMVMwareVMXGetEntryForKey(vmx, SMVMwareVMXUUIDLocationKey);
-
-	// For now, just return. Consider to actually add the keys in the future.
-	if (!uuid_bios_entry && !uuid_location_entry)
-		return true;
 	
 	// Format UUID value for VMX.
 	char	result[47 + 1] = { 0 };
@@ -58,10 +54,20 @@ bool SMVMwareVMXSetMachineUUID(SMVMwareVMX *vmx, uuid_t uuid, SMError **error)
 		if (!SMVMwareVMXEntrySetValue(uuid_bios_entry, result, error))
 			return false;
 	}
+	else
+	{
+		if (!SMVMwareNVRAMEntryAddKeyValue(vmx, SMVMwareVMXUUIDBiosKey, result, error))
+			return false;
+	}
 	
 	if (uuid_location_entry)
 	{
 		if (!SMVMwareVMXEntrySetValue(uuid_location_entry, result, error))
+			return false;
+	}
+	else
+	{
+		if (!SMVMwareNVRAMEntryAddKeyValue(vmx, SMVMwareVMXUUIDLocationKey, result, error))
 			return false;
 	}
 	
