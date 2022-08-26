@@ -44,6 +44,8 @@
 		E8F438A128B9469B009782DC /* guestos-1.vmx in Resources */ = {isa = PBXBuildFile; fileRef = E8F4389F28B9469B009782DC /* guestos-1.vmx */; };
 		E8F438A228B9469B009782DC /* guestos-2.vmx in Resources */ = {isa = PBXBuildFile; fileRef = E8F438A028B9469B009782DC /* guestos-2.vmx */; };
 		E8F438A428B947EC009782DC /* empty-1.vmx in Resources */ = {isa = PBXBuildFile; fileRef = E8F438A328B947EC009782DC /* empty-1.vmx */; };
+		E8F438A628B960EE009782DC /* SMCommandLineTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F438A528B960EE009782DC /* SMCommandLineTests.m */; };
+		E8F438A728B96133009782DC /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = E8BB3B9E2895A2DE00E57C3A /* main.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -101,6 +103,7 @@
 		E8F4389F28B9469B009782DC /* guestos-1.vmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "guestos-1.vmx"; path = "resources/guestos-1.vmx"; sourceTree = "<group>"; };
 		E8F438A028B9469B009782DC /* guestos-2.vmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "guestos-2.vmx"; path = "resources/guestos-2.vmx"; sourceTree = "<group>"; };
 		E8F438A328B947EC009782DC /* empty-1.vmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "empty-1.vmx"; path = "resources/empty-1.vmx"; sourceTree = "<group>"; };
+		E8F438A528B960EE009782DC /* SMCommandLineTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMCommandLineTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,6 +238,7 @@
 		E8C510B6289F41D1000D8F2E /* tests */ = {
 			isa = PBXGroup;
 			children = (
+				E8F438A528B960EE009782DC /* SMCommandLineTests.m */,
 				E8296BF7289C319F0006DDDB /* SMBytesWritterTests.m */,
 				E8A37482289D45C700FA3EDA /* SMErrorTests.m */,
 				E8B70EE92898831500903682 /* SMStringHelperTests.m */,
@@ -382,8 +386,10 @@
 				E8518031289C42B400B78B58 /* SMVMwareVMX.c in Sources */,
 				E8B70EEA2898831500903682 /* SMStringHelperTests.m in Sources */,
 				E8518030289C42AB00B78B58 /* SMVMwareVMXHelper.c in Sources */,
+				E8F438A728B96133009782DC /* main.c in Sources */,
 				E87EE65F28A193FE004A8A07 /* SMVMwareNVRAMTests.m in Sources */,
 				E8E621F228B05A9900FF7661 /* SMVMwareNVRAM.c in Sources */,
+				E8F438A628B960EE009782DC /* SMCommandLineTests.m in Sources */,
 				E8296BF6289C31530006DDDB /* SMVMwareVMXTests.m in Sources */,
 				E8296BF8289C319F0006DDDB /* SMBytesWritterTests.m in Sources */,
 				E8A23995289AFAD10076A869 /* SMError.c in Sources */,
@@ -415,6 +421,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"PROJ_VERSION=1.0.0",
+					"$(inherited)",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 12.5;
@@ -432,6 +442,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				GCC_PREPROCESSOR_DEFINITIONS = "PROJ_VERSION=1.0.0";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 12.5;
@@ -562,7 +573,6 @@
 				DEVELOPMENT_TEAM = ZLE27JLYK3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
 					"PROJ_VERSION=${CURRENT_PROJECT_VERSION}",
 					"$(inherited)",
 				);
