@@ -22,7 +22,7 @@
 
 #pragma once
 
-// C-String
+// Test asserts.
 #define XCTAssertEqualFreeableStrings(FreeableString, ReferenceString) ({	\
 	char		*__freeable_str = (FreeableString);							\
 	const char	*__ref_str = (ReferenceString);								\
@@ -40,6 +40,42 @@
 																			\
 	XCTAssertEqual(__result, 0, "'%s' != '%s'", __test_str, __ref_str);		\
 })
+
+#define XCTAssertContainString(WholeString, WholeSize, PartString) ({					\
+	const char	*__whole_str = (WholeString);											\
+	size_t 		__whole_size = (WholeSize);												\
+	const char	*__part_str = (PartString);												\
+	char		*__result = strnstr(__whole_str, __part_str, __whole_size);				\
+																						\
+	XCTAssertNotEqual(__result, NULL, "'%s' not in '%.20s...'", __part_str, __whole_str);	\
+})
+
+#define XCTAssertNotContainString(WholeString, WholeSize, PartString) ({				\
+	const char	*__whole_str = (WholeString);											\
+	size_t 		__whole_size = (WholeSize);												\
+	const char	*__part_str = (PartString);												\
+	char		*__result = strnstr(__whole_str, __part_str, __whole_size);				\
+																						\
+	XCTAssertEqual(__result, NULL, "'%s' in '%.20s...'", __part_str, __result);			\
+})
+
+// Boilerplate.
+#define SMDeclareDefaultFiles 								\
+	char	**bout = (char **)calloc(1, sizeof(void *));	\
+	char	**berr = (char **)calloc(1, sizeof(void *));	\
+	size_t	sout = 0;										\
+	size_t	serr = 0;										\
+	FILE	*fout = open_memstream(bout, &sout);			\
+	FILE	*ferr = open_memstream(berr, &serr);			\
+															\
+	_onExit { 												\
+		fclose(fout);										\
+		fclose(ferr);										\
+		free(*bout); 										\
+		free(*berr);										\
+		free(bout); 										\
+		free(berr); 										\
+	}
 
 // On-exit
 static inline void _execBlock (__strong dispatch_block_t *block) {

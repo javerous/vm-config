@@ -496,7 +496,7 @@ typedef struct
 	NSBundle *bundle = [NSBundle bundleForClass:self.class];
 	NSString *path = [bundle pathForResource:file ofType:@"vmx"];
 	
-	assert(path);
+	NSAssert(path, @"cannot find VMX file '%@'", file);
 	
 	return SMVMwareVMXOpen(path.fileSystemRepresentation, error);
 }

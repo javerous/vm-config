@@ -85,7 +85,6 @@ static const char gBlanckCharacters[] = { ' ', '\t' };
 static const char gBlanckAndNewlineCharacters[] = { ' ', '\t', '\n' };
 
 
-
 /*
 ** Prototypes
 */
@@ -259,6 +258,22 @@ fail:
 
 #pragma mark > Entries
 
+SMVMwareVMXEntry *	SMVMwareVMXAddEntryKeyValue(SMVMwareVMX *vmx, const char *key, const char *value, SMError **error)
+{
+	// Create instance.
+	SMVMwareVMXEntry *entry = SMVMwareVMXEntryCreateKeyValue(key, value, error);
+	
+	if (!entry)
+		return NULL;
+	
+	// Add to entries.
+	SMVMwareVMXAddEntry(vmx, entry);
+	SMVMwareVMXEntryMarkUpdated(entry);
+	
+	// Return added entry.
+	return entry;
+}
+
 static void SMVMwareVMXAddEntry(SMVMwareVMX *vmx, SMVMwareVMXEntry *entry)
 {
 	vmx->entries = reallocf(vmx->entries, (vmx->entries_cnt + 1) * sizeof(*vmx->entries));
@@ -305,22 +320,6 @@ SMVMwareVMXEntry * SMVMwareVMXGetEntryForKey(SMVMwareVMX *vmx, const char *key)
 	}
 	
 	return NULL;
-}
-
-SMVMwareVMXEntry * SMVMwareNVRAMEntryAddKeyValue(SMVMwareVMX *vmx, const char *key, const char *value, SMError **error)
-{
-	// Create instance.
-	SMVMwareVMXEntry *entry = SMVMwareVMXEntryCreateKeyValue(key, value, error);
-	
-	if (!entry)
-		return NULL;
-	
-	// Add to entries.
-	SMVMwareVMXAddEntry(vmx, entry);
-	SMVMwareVMXEntryMarkUpdated(entry);
-	
-	// Return added entry.
-	return entry;
 }
 
 

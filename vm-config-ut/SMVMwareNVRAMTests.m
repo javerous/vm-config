@@ -490,8 +490,8 @@ typedef NS_ENUM(NSUInteger, SMModificationPhase)
 	NSBundle *bundle = [NSBundle bundleForClass:self.class];
 	NSString *path = [bundle pathForResource:file ofType:@"nvram"];
 	
-	assert(path);
-	
+	NSAssert(path, @"cannot find NVRAM file '%@'", file);
+
 	return SMVMwareNVRAMOpen(path.fileSystemRepresentation, error);
 }
 

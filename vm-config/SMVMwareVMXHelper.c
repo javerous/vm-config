@@ -56,7 +56,7 @@ bool SMVMwareVMXSetMachineUUID(SMVMwareVMX *vmx, uuid_t uuid, SMError **error)
 	}
 	else
 	{
-		if (!SMVMwareNVRAMEntryAddKeyValue(vmx, SMVMwareVMXUUIDBiosKey, result, error))
+		if (!SMVMwareVMXAddEntryKeyValue(vmx, SMVMwareVMXUUIDBiosKey, result, error))
 			return false;
 	}
 	
@@ -67,7 +67,7 @@ bool SMVMwareVMXSetMachineUUID(SMVMwareVMX *vmx, uuid_t uuid, SMError **error)
 	}
 	else
 	{
-		if (!SMVMwareNVRAMEntryAddKeyValue(vmx, SMVMwareVMXUUIDLocationKey, result, error))
+		if (!SMVMwareVMXAddEntryKeyValue(vmx, SMVMwareVMXUUIDLocationKey, result, error))
 			return false;
 	}
 	

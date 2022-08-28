@@ -52,7 +52,6 @@ typedef enum
 extern const char * SMVMwareVMXErrorDomain;
 
 
-
 /*
 ** Functions
 */
@@ -70,12 +69,12 @@ const char *	SMVMwareVMXGetPath(SMVMwareVMX *vmx);
 bool SMVMwareVMXWriteToFile(SMVMwareVMX *vmx, const char *path, SMError **error);
 
 // > Entries.
+SMVMwareVMXEntry *	SMVMwareVMXAddEntryKeyValue(SMVMwareVMX *vmx, const char *key, const char *value, SMError **error);
+
 size_t				SMVMwareVMXEntriesCount(SMVMwareVMX *vmx);
 SMVMwareVMXEntry *	SMVMwareVMXGetEntryAtIndex(SMVMwareVMX *vmx, size_t idx);
 
 SMVMwareVMXEntry *	SMVMwareVMXGetEntryForKey(SMVMwareVMX *vmx, const char *key);
-
-SMVMwareVMXEntry *	SMVMwareNVRAMEntryAddKeyValue(SMVMwareVMX *vmx, const char *key, const char *value, SMError **error);
 
 
 // Entry.
