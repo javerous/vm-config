@@ -106,7 +106,7 @@ size_t					SMVMwareNVRAMEntriesCount(SMVMwareNVRAM *nvram);
 SMVMwareNVRAMEntry *	SMVMwareNVRAMGetEntryAtIndex(SMVMwareNVRAM *nvram, size_t idx);
 
 
-// Entries.
+// Entry.
 // > Properties.
 SMVMwareNVRAMEntryType	SMVMwareNVRAMEntryGetType(SMVMwareNVRAMEntry *entry);
 

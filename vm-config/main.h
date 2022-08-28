@@ -1,5 +1,5 @@
 /*
- *  SMCommandLineTests.m
+ *  main.h
  *
  *  Copyright 2022 Avérous Julien-Pierre
  *
@@ -20,57 +20,26 @@
  *
  */
 
-#import <XCTest/XCTest.h>
+#pragma once
+
+#include <stdio.h>
 
 
 /*
-** Externs
+** Defines
 */
-#pragma mark - Externs
+#pragma mark Defines
 
-extern int main(int argc, const char * argv[]);
+#define SMMainExitSuccess 		0
+#define SMMainExitUnknowError	1
+#define SMMainExitInvalidArgs	2
+#define SMMainExitInvalidVM		3
+
 
 
 /*
-** SMCommandLineTests
+** Main
 */
-#pragma mark - SMCommandLineTests
+#pragma mark - Main
 
-@interface SMCommandLineTests : XCTestCase
-
-@end
-
-@implementation SMCommandLineTests
-
-- (void)testNotArguments
-{
-	const char *argv[] = {
-		"ut"
-	};
-	
-	XCTAssertEqual(main(sizeof(argv) / sizeof(*argv), argv), 1);
-}
-
-- (void)testVersion
-{
-	const char *argv[] = {
-		"ut",
-		"version"
-	};
-	
-	XCTAssertEqual(main(sizeof(argv) / sizeof(*argv), argv), 0);
-}
-
-- (void)testInvalidVerb
-{
-	const char *argv[] = {
-		"ut",
-		"invalid-verb"
-	};
-	
-	XCTAssertEqual(main(sizeof(argv) / sizeof(*argv), argv), 2);
-}
-
-// FIXME: add more exhaustive tests.
-
-@end
+int internal_main(int argc, const char * argv[], FILE *fout, FILE *ferr);
