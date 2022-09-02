@@ -855,7 +855,7 @@ static int main_change(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 	}
 	
 	// Finish.
-	fprintf(ferr, "Virtual machine configuration changed with success.\n");
+	fprintf(fout, "Virtual machine configuration changed with success.\n");
 	
 	goto clean;
 	
