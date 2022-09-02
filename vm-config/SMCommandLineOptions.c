@@ -617,46 +617,49 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 		// > Store identifier.
 		result_parameter->identifier = param_identifier;
 
-		// > Store value.
+		// > Handle & store value.
+		bool	convert_succes = false;
+		SMError	*convert_error = NULL;
+		
 		result_parameter->value_type = param_type;
 		
 		switch (param_type)
 		{
 			case SMCLValueTypeString:
 				result_parameter->value.str = param_value ? strdup(param_value) : NULL;
+				convert_succes = true;
 				break;
 				
 			case SMCLValueTypeUInt32:
 			{
-				if (!SMCLParseUInt32(param_value, &result_parameter->value.uint32, error))
-					goto fail;
-				
+				convert_succes = SMCLParseUInt32(param_value, &result_parameter->value.uint32, &convert_error);
 				break;
 			}
 				
 			case SMCLValueTypeInt32:
 			{
-				if (!SMCLParseInt32(param_value, &result_parameter->value.int32, error))
-					goto fail;
-				
+				convert_succes = SMCLParseInt32(param_value, &result_parameter->value.int32, &convert_error);
 				break;
 			}
 				
 			case SMCLValueTypeUInt64:
 			{
-				if (!SMCLParseUInt64(param_value, &result_parameter->value.uint64, error))
-					goto fail;
-				
+				convert_succes = SMCLParseUInt64(param_value, &result_parameter->value.uint64, &convert_error);
 				break;
 			}
 				
 			case SMCLValueTypeInt64:
 			{
-				if (!SMCLParseInt64(param_value, &result_parameter->value.int64, error))
-					goto fail;
-				
+				convert_succes = SMCLParseInt64(param_value, &result_parameter->value.int64, &convert_error);
 				break;
 			}
+		}
+		
+		if (!convert_succes)
+		{
+			SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "invalid value for '%s' (%s)", arg, SMErrorGetUserInfo(convert_error));
+			SMErrorFree(convert_error);
+			goto fail;
 		}
 		
 		// > Skip all handled parameters, so we don't re-handle multiple time same parameters, like values which are not named.
@@ -706,6 +709,11 @@ size_t SMCLOptionsResultParametersCount(SMCLOptionsResult *result)
 uint64_t SMCLOptionsResultParameterIdentifierAtIndex(SMCLOptionsResult *result, size_t idx)
 {
 	return result->parameters[idx].identifier;
+}
+
+SMCLValueType SMCLOptionsResultParameterTypeAtIndex(SMCLOptionsResult *result, size_t idx)
+{
+	return result->parameters[idx].value_type;
 }
 
 const char * SMCLOptionsResultParameterStringValueAtIndex(SMCLOptionsResult *result, size_t idx)
@@ -892,10 +900,12 @@ static bool SMCLParseRawInteger(const char *str, uint64_t *result, bool *negativ
 
 	if (str[0] == '0' && str[1] == 'x')
 	{
+		// > Skip hexa prefix.
 		str += 2;
 		
 		while (*str)
 		{
+			// > Convert digit.
 			unsigned	add = 0;
 			char		ch = *str;
 			
@@ -911,19 +921,16 @@ static bool SMCLParseRawInteger(const char *str, uint64_t *result, bool *negativ
 				return false;
 			}
 			
-			if (__builtin_mul_overflow(lresult, (uint64_t)16, &lresult))
+			// > Compute 'lresult = lresult * 16 + add'.
+			if (__builtin_mul_overflow(lresult, (uint64_t)16, &lresult) ||
+				__builtin_add_overflow(lresult, (uint64_t)add, &lresult))
 			{
 				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
 				return false;
 
 			}
 			
-			if (__builtin_add_overflow(lresult, (uint64_t)add, &lresult))
-			{
-				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
-				return false;
-			}
-			
+			// > Next character.
 			str++;
 		}
 	}
@@ -931,10 +938,12 @@ static bool SMCLParseRawInteger(const char *str, uint64_t *result, bool *negativ
 	// Handle octal.
 	else if (str[0] == '0')
 	{
+		// > Skip octal prefix.
 		str += 1;
 		
 		while (*str)
 		{
+			// > Convert digit.
 			unsigned	add = 0;
 			char		ch = *str;
 			
@@ -946,19 +955,15 @@ static bool SMCLParseRawInteger(const char *str, uint64_t *result, bool *negativ
 				return false;
 			}
 			
-			if (__builtin_mul_overflow(lresult, (uint64_t)8, &lresult))
-			{
-				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
-				return false;
-
-			}
-			
-			if (__builtin_add_overflow(lresult, (uint64_t)add, &lresult))
+			// > Compute 'lresult = lresult * 8 + add'.
+			if (__builtin_mul_overflow(lresult, (uint64_t)8, &lresult) ||
+				__builtin_add_overflow(lresult, (uint64_t)add, &lresult))
 			{
 				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
 				return false;
 			}
 			
+			// > Next character.
 			str++;
 		}
 	}
@@ -968,6 +973,7 @@ static bool SMCLParseRawInteger(const char *str, uint64_t *result, bool *negativ
 	{
 		while (*str)
 		{
+			// > Convert digit.
 			unsigned	add = 0;
 			char		ch = *str;
 			
@@ -979,19 +985,15 @@ static bool SMCLParseRawInteger(const char *str, uint64_t *result, bool *negativ
 				return false;
 			}
 			
-			if (__builtin_mul_overflow(lresult, (uint64_t)10, &lresult))
-			{
-				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
-				return false;
-
-			}
-			
-			if (__builtin_add_overflow(lresult, (uint64_t)add, &lresult))
+			// > Compute 'lresult = lresult * 10 + add'.
+			if (__builtin_mul_overflow(lresult, (uint64_t)10, &lresult) ||
+				__builtin_add_overflow(lresult, (uint64_t)add, &lresult))
 			{
 				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
 				return false;
 			}
 			
+			// > Next character.
 			str++;
 		}
 	}

@@ -100,6 +100,7 @@ uint64_t		SMCLOptionsResultVerbIdentifier(SMCLOptionsResult *result);
 size_t			SMCLOptionsResultParametersCount(SMCLOptionsResult *result);
 uint64_t  		SMCLOptionsResultParameterIdentifierAtIndex(SMCLOptionsResult *result, size_t idx);
 
+SMCLValueType	SMCLOptionsResultParameterTypeAtIndex(SMCLOptionsResult *result, size_t idx);
 const char *	SMCLOptionsResultParameterStringValueAtIndex(SMCLOptionsResult *result, size_t idx);
 uint32_t		SMCLOptionsResultParameterUInt32ValueAtIndex(SMCLOptionsResult *result, size_t idx);
 int32_t			SMCLOptionsResultParameterInt32ValueAtIndex(SMCLOptionsResult *result, size_t idx);
