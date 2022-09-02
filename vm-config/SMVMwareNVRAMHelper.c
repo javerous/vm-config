@@ -59,7 +59,7 @@ static uint32_t csr_version_4(bool enable, uint32_t current_csr);
 
 bool SMVMwareNVRAMSetBootArgs(SMVMwareNVRAM *nvram, const char *boot_args, SMError **error)
 {
-	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarBootArgsName, error);
+	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarBootArgsName, NULL);
 
 	if (var)
 		SMVMwareNVRAMVariableSetValue(var, boot_args, strlen(boot_args) + 1);
@@ -103,7 +103,7 @@ bool SMVMwareNVRAMGetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t *csr, S
 
 bool SMVMwareNVRAMSetAppleCSRActiveConfig(SMVMwareNVRAM *nvram, uint32_t csr, SMError **error)
 {
-	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarCSRActiveConfigName, error);
+	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarCSRActiveConfigName, NULL);
 	
 	if (var)
 		SMVMwareNVRAMVariableSetValue(var, &csr, sizeof(csr));
@@ -183,7 +183,7 @@ bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, SMVersion macos_ve
 	}
 	
 	// Fetch or create new entry.
-	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarCSRActiveConfigName, error);
+	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarCSRActiveConfigName, NULL);
 
 	if (!var)
 	{
@@ -298,7 +298,7 @@ bool SMVMwareNVRAMGetApplePlatformUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMErro
 
 bool SMVMwareNVRAMSetApplePlatformUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError **error)
 {
-	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarPlatformUUIDName, error);
+	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_nvram_variable_guid, SMEFIAppleNVRAMVarPlatformUUIDName, NULL);
 	
 	if (var)
 		SMVMwareNVRAMVariableSetValue(var, uuid, sizeof(uuid_t));
@@ -324,7 +324,7 @@ bool SMVMwareNVRAMSetAppleMachineUUID(SMVMwareNVRAM *nvram, uuid_t uuid, SMError
 		return false;
 	
 	// Replace DHCPv6 ClientID (RFC 3315 DUID). It's okay if there is no such variable.
-	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_dhcpv6_service_binding_guid, SMEFIVarDHCPv6ClientIDName, error);
+	SMVMwareNVRAMEFIVariable *var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_dhcpv6_service_binding_guid, SMEFIVarDHCPv6ClientIDName, NULL);
 
 	if (!var)
 		return true;
@@ -408,8 +408,8 @@ bool SMVMwareNVRAMSetScreenResolution(SMVMwareNVRAM *nvram, uint32_t width, uint
 	SMVMwareNVRAMEntry	*entry = NULL;
 	uint32_t			attributes = EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
 
-	SMVMwareNVRAMEFIVariable *width_var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_screen_resolution_guid, SMEFIVarAppleScreenResolutionWidthName, error);
-	SMVMwareNVRAMEFIVariable *height_var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_screen_resolution_guid, SMEFIVarAppleScreenResolutionHeightName, error);
+	SMVMwareNVRAMEFIVariable *width_var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_screen_resolution_guid, SMEFIVarAppleScreenResolutionWidthName, NULL);
+	SMVMwareNVRAMEFIVariable *height_var = SMVMwareNVRAMVariableForGUIDAndName(nvram, &g_apple_screen_resolution_guid, SMEFIVarAppleScreenResolutionHeightName, NULL);
 
 	if (width_var)
 		SMVMwareNVRAMVariableSetValue(width_var, &width, sizeof(width));

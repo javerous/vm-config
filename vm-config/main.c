@@ -179,6 +179,7 @@ int internal_main(int argc, const char * argv[], FILE *fout, FILE *ferr)
 		SMCLOptionsPrintUsage(options, ferr);
 		
 		SMCLOptionsFree(options);
+		SMErrorFree(error);
 
 		return SMMainExitInvalidArgs;
 	}
