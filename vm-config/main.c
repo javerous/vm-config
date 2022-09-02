@@ -219,7 +219,7 @@ static int main_show(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 	SMError			*error = NULL;
 	
 	// Handle options.
-	const char	*vm_path;
+	const char	*vm_path = NULL;
 	bool		show_vmx = false;
 	bool		show_nvram = false;
 	bool		show_nvram_efi_variables = false;
@@ -592,7 +592,7 @@ static int main_change(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 	SMError			*error = NULL;
 	
 	// Handle options.
-	const char		*vm_path;
+	const char		*vm_path  = NULL;
 	char			*vmx_path_tmp_path = NULL;
 	char			*nvram_path_tmp_path = NULL;
 	

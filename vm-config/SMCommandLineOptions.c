@@ -686,6 +686,9 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 			goto fail;
 		}
 	}
+	
+	// Clean.
+	free(parameters);
 
 	// Success.
 	return result;
