@@ -39,11 +39,23 @@ typedef struct SMCLOptionsVerb		SMCLOptionsVerb;
 
 typedef struct SMCLOptionsResult	SMCLOptionsResult;
 
-
 typedef enum
 {
 	SMCLParameterArgumentTypeString,
 } SMCLParameterArgumentType;
+
+typedef enum
+{
+	// Parse errors.
+	SMCLErrorParseInvalidArgumentsArray = 1,// The argument array passed to parser is invalid.
+	SMCLErrorParseMissingVerb,				// The verv in the argument array is missing.
+	SMCLErrorParseUnknowVerb,				// The verb in the argument array is unknown.
+	SMCLErrorParseUnexpectedArgument, 		// An argument in argument array which have invalid format.
+	SMCLErrorParseUnexpectedExtraArgument,	// An argument in argument array that have good format, and may be valid, but that we can't match.
+	SMCLErrorParseUnkownOption,				// An option in the argument array is unknown.
+	SMCLErrorParseMissingOptionArgument,	// An option in the argument array require an argument, but none is available.
+	SMCLErrorParseMissingParameter,			// A parameter was not optional, but not provided in the argument array.
+} SMCLError;
 
 
 /*
