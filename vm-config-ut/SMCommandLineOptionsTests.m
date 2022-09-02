@@ -62,7 +62,15 @@ typedef struct
 	uint64_t	verb_identifier;
 
 	uint64_t	identifier;
-	const char	*value;
+	
+	SMCLValueType value_type;
+	union {
+		char		*str;
+		uint64_t	uint64;
+		int64_t		int64;
+		uint32_t	uint32;
+		int32_t		int32;
+	} value;
 } SMCLParsedParameterTest;
 
 
@@ -445,9 +453,9 @@ typedef struct
 	
 	// Validate result.
 	SMCLParsedParameterTest expectedResult[] = {
-		{ 	.verb_identifier = 2, .identifier = 0, .value = "the-value" },
-		{ 	.verb_identifier = 2, .identifier = 1, .value = NULL },
-		{ 	.verb_identifier = 2, .identifier = 2, .value = "an-argument" },
+		{ 	.verb_identifier = 2, .identifier = 0, .value_type = SMCLValueTypeString, .value.str = "the-value" },
+		{ 	.verb_identifier = 2, .identifier = 1, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 2, .identifier = 2, .value_type = SMCLValueTypeString, .value.str = "an-argument" },
 	};
 	
 	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
@@ -483,11 +491,11 @@ typedef struct
 	
 	// Validate result.
 	SMCLParsedParameterTest expectedResult[] = {
-		{ 	.verb_identifier = 2, .identifier = 0, .value = "the-value" },
-		{ 	.verb_identifier = 2, .identifier = 1, .value = NULL },
-		{ 	.verb_identifier = 2, .identifier = 2, .value = "an-argument" },
-		{ 	.verb_identifier = 2, .identifier = 3, .value = NULL },
-		{ 	.verb_identifier = 2, .identifier = 4, .value = "optional-argument" },
+		{ 	.verb_identifier = 2, .identifier = 0, .value_type = SMCLValueTypeString, .value.str = "the-value" },
+		{ 	.verb_identifier = 2, .identifier = 1, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 2, .identifier = 2, .value_type = SMCLValueTypeString, .value.str = "an-argument" },
+		{ 	.verb_identifier = 2, .identifier = 3, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 2, .identifier = 4, .value_type = SMCLValueTypeString, .value.str = "optional-argument" },
 	};
 	
 	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
@@ -523,11 +531,11 @@ typedef struct
 	
 	// Validate result.
 	SMCLParsedParameterTest expectedResult[] = {
-		{ 	.verb_identifier = 2, .identifier = 0, .value = "the-value" },
-		{ 	.verb_identifier = 2, .identifier = 2, .value = "an-argument" },
-		{ 	.verb_identifier = 2, .identifier = 1, .value = NULL },
-		{ 	.verb_identifier = 2, .identifier = 4, .value = "optional-argument" },
-		{ 	.verb_identifier = 2, .identifier = 3, .value = NULL },
+		{ 	.verb_identifier = 2, .identifier = 0, .value_type = SMCLValueTypeString, .value.str = "the-value" },
+		{ 	.verb_identifier = 2, .identifier = 2, .value_type = SMCLValueTypeString, .value.str = "an-argument" },
+		{ 	.verb_identifier = 2, .identifier = 1, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 2, .identifier = 4, .value_type = SMCLValueTypeString, .value.str = "optional-argument" },
+		{ 	.verb_identifier = 2, .identifier = 3, .value_type = SMCLValueTypeString, .value.str = NULL },
 	};
 	
 	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
@@ -560,9 +568,9 @@ typedef struct
 	
 	// Validate result.
 	SMCLParsedParameterTest expectedResult[] = {
-		{ 	.verb_identifier = 2, .identifier = 0, .value = "the-value" },
-		{ 	.verb_identifier = 2, .identifier = 2, .value = "an-argument" },
-		{ 	.verb_identifier = 2, .identifier = 1, .value = NULL },
+		{ 	.verb_identifier = 2, .identifier = 0, .value_type = SMCLValueTypeString, .value.str = "the-value" },
+		{ 	.verb_identifier = 2, .identifier = 2, .value_type = SMCLValueTypeString, .value.str = "an-argument" },
+		{ 	.verb_identifier = 2, .identifier = 1, .value_type = SMCLValueTypeString, .value.str = NULL },
 	};
 	
 	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
@@ -597,12 +605,12 @@ typedef struct
 	
 	// Validate result.
 	SMCLParsedParameterTest expectedResult[] = {
-		{ 	.verb_identifier = 3, .identifier = 5, .value = NULL },
-		{ 	.verb_identifier = 3, .identifier = 6, .value = "value-1" },
-		{ 	.verb_identifier = 3, .identifier = 7, .value = "value-2" },
-		{ 	.verb_identifier = 3, .identifier = 8, .value = NULL },
-		{ 	.verb_identifier = 3, .identifier = 9, .value = NULL },
-		{ 	.verb_identifier = 3, .identifier = 10, .value = "value-3" },
+		{ 	.verb_identifier = 3, .identifier = 5, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 3, .identifier = 6, .value_type = SMCLValueTypeString, .value.str = "value-1" },
+		{ 	.verb_identifier = 3, .identifier = 7, .value_type = SMCLValueTypeString, .value.str = "value-2" },
+		{ 	.verb_identifier = 3, .identifier = 8, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 3, .identifier = 9, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 3, .identifier = 10, .value_type = SMCLValueTypeString, .value.str = "value-3" },
 	};
 	
 	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
@@ -637,12 +645,12 @@ typedef struct
 	
 	// Validate result.
 	SMCLParsedParameterTest expectedResult[] = {
-		{ 	.verb_identifier = 3, .identifier = 5, .value = NULL },
-		{ 	.verb_identifier = 3, .identifier = 6, .value = "value-1" },
-		{ 	.verb_identifier = 3, .identifier = 7, .value = "value-2" },
-		{ 	.verb_identifier = 3, .identifier = 9, .value = NULL },
-		{ 	.verb_identifier = 3, .identifier = 8, .value = NULL },
-		{ 	.verb_identifier = 3, .identifier = 10, .value = "value-3" },
+		{ 	.verb_identifier = 3, .identifier = 5, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 3, .identifier = 6, .value_type = SMCLValueTypeString, .value.str = "value-1" },
+		{ 	.verb_identifier = 3, .identifier = 7, .value_type = SMCLValueTypeString, .value.str = "value-2" },
+		{ 	.verb_identifier = 3, .identifier = 9, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 3, .identifier = 8, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 3, .identifier = 10, .value_type = SMCLValueTypeString,  .value.str = "value-3" },
 	};
 	
 	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
@@ -676,11 +684,11 @@ typedef struct
 	
 	// Validate result.
 	SMCLParsedParameterTest expectedResult[] = {
-		{ 	.verb_identifier = 3, .identifier = 5, .value = NULL },
-		{ 	.verb_identifier = 3, .identifier = 6, .value = "value-1" },
-		{ 	.verb_identifier = 3, .identifier = 7, .value = "value-2" },
-		{ 	.verb_identifier = 3, .identifier = 8, .value = NULL },
-		{ 	.verb_identifier = 3, .identifier = 10, .value = "value-3" },
+		{ 	.verb_identifier = 3, .identifier = 5, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 3, .identifier = 6, .value_type = SMCLValueTypeString, .value.str = "value-1" },
+		{ 	.verb_identifier = 3, .identifier = 7, .value_type = SMCLValueTypeString, .value.str = "value-2" },
+		{ 	.verb_identifier = 3, .identifier = 8, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 3, .identifier = 10, .value_type = SMCLValueTypeString, .value.str = "value-3" },
 	};
 	
 	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
@@ -711,8 +719,8 @@ typedef struct
 	
 	// Validate result.
 	SMCLParsedParameterTest expectedResult[] = {
-		{ 	.verb_identifier = 5, .identifier = 12, .value = NULL },
-		{ 	.verb_identifier = 5, .identifier = 13, .value = NULL },
+		{ 	.verb_identifier = 5, .identifier = 12, .value_type = SMCLValueTypeString, .value.str = NULL },
+		{ 	.verb_identifier = 5, .identifier = 13, .value_type = SMCLValueTypeString, .value.str = NULL },
 	};
 	
 	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
@@ -742,7 +750,7 @@ typedef struct
 	
 	// Validate result.
 	SMCLParsedParameterTest expectedResult[] = {
-		{ 	.verb_identifier = 5, .identifier = 12, .value = NULL },
+		{ 	.verb_identifier = 5, .identifier = 12, .value_type = SMCLValueTypeString, .value.str = NULL },
 	};
 	
 	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
@@ -772,7 +780,159 @@ typedef struct
 	
 	// Validate result.
 	SMCLParsedParameterTest expectedResult[] = {
-		{ 	.verb_identifier = 4, .identifier = 11, .value = "my_value" },
+		{ 	.verb_identifier = 4, .identifier = 11, .value_type = SMCLValueTypeString, .value.str = "my_value" },
+	};
+	
+	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
+}
+
+- (void)testParseTypes1
+{
+	// Get standard options.
+	SMCLOptions *options = [self standardOptions];
+
+	_onExit {
+		SMCLOptionsFree(options);
+	};
+
+	// Parse.
+	const char *argv[] = {
+		"ut-main",
+		"verb6",
+		"--v6-string", "hello",
+		"--v6-uint32", "42",
+		"--v6-int32", "-43",
+		"--v6-uint64", "44",
+		"--v6-int64", "-45",
+	};
+	
+	SMError				*error = NULL;
+	SMCLOptionsResult	*result = SMCLOptionsParse(options, sizeof(argv) / sizeof(*argv), argv, &error);
+
+	// Test result.
+	XCTAssertSuccess(result, error);
+	
+	// Validate result.
+	SMCLParsedParameterTest expectedResult[] = {
+		{ 	.verb_identifier = 6, .identifier = 14, .value_type = SMCLValueTypeString, .value.str = "hello" },
+		{ 	.verb_identifier = 6, .identifier = 15, .value_type = SMCLValueTypeUInt32, .value.uint32 = 42 },
+		{ 	.verb_identifier = 6, .identifier = 16, .value_type = SMCLValueTypeInt32, .value.int32 = -43 },
+		{ 	.verb_identifier = 6, .identifier = 17, .value_type = SMCLValueTypeUInt64, .value.uint64 = 44 },
+		{ 	.verb_identifier = 6, .identifier = 18, .value_type = SMCLValueTypeInt64, .value.int64 = -45 },
+	};
+	
+	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
+}
+
+- (void)testParseTypes2
+{
+	// Get standard options.
+	SMCLOptions *options = [self standardOptions];
+
+	_onExit {
+		SMCLOptionsFree(options);
+	};
+
+	// Parse.
+	const char *argv[] = {
+		"ut-main",
+		"verb6",
+		"--v6-string", "hello",
+		"--v6-uint32", "0xab",
+		"--v6-int32", "-0xac",
+		"--v6-uint64", "0xad",
+		"--v6-int64", "-0xae",
+	};
+	
+	SMError				*error = NULL;
+	SMCLOptionsResult	*result = SMCLOptionsParse(options, sizeof(argv) / sizeof(*argv), argv, &error);
+
+	// Test result.
+	XCTAssertSuccess(result, error);
+	
+	// Validate result.
+	SMCLParsedParameterTest expectedResult[] = {
+		{ 	.verb_identifier = 6, .identifier = 14, .value_type = SMCLValueTypeString, .value.str = "hello" },
+		{ 	.verb_identifier = 6, .identifier = 15, .value_type = SMCLValueTypeUInt32, .value.uint32 = 0xab },
+		{ 	.verb_identifier = 6, .identifier = 16, .value_type = SMCLValueTypeInt32, .value.int32 = -0xac },
+		{ 	.verb_identifier = 6, .identifier = 17, .value_type = SMCLValueTypeUInt64, .value.uint64 = 0xad },
+		{ 	.verb_identifier = 6, .identifier = 18, .value_type = SMCLValueTypeInt64, .value.int64 = -0xae },
+	};
+	
+	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
+}
+
+- (void)testParseTypes3
+{
+	// Get standard options.
+	SMCLOptions *options = [self standardOptions];
+
+	_onExit {
+		SMCLOptionsFree(options);
+	};
+
+	// Parse.
+	const char *argv[] = {
+		"ut-main",
+		"verb6",
+		"--v6-string", "hello",
+		"--v6-uint32", "0755",
+		"--v6-int32", "-0666",
+		"--v6-uint64", "0644",
+		"--v6-int64", "-0777",
+	};
+	
+	SMError				*error = NULL;
+	SMCLOptionsResult	*result = SMCLOptionsParse(options, sizeof(argv) / sizeof(*argv), argv, &error);
+
+	// Test result.
+	XCTAssertSuccess(result, error);
+	
+	// Validate result.
+	SMCLParsedParameterTest expectedResult[] = {
+		{ 	.verb_identifier = 6, .identifier = 14, .value_type = SMCLValueTypeString, .value.str = "hello" },
+		{ 	.verb_identifier = 6, .identifier = 15, .value_type = SMCLValueTypeUInt32, .value.uint32 = 0755 },
+		{ 	.verb_identifier = 6, .identifier = 16, .value_type = SMCLValueTypeInt32, .value.int32 = -0666 },
+		{ 	.verb_identifier = 6, .identifier = 17, .value_type = SMCLValueTypeUInt64, .value.uint64 = 0644 },
+		{ 	.verb_identifier = 6, .identifier = 18, .value_type = SMCLValueTypeInt64, .value.int64 = -0777 },
+	};
+	
+	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
+}
+
+- (void)testParseTypes4
+{
+	// Get standard options.
+	SMCLOptions *options = [self standardOptions];
+
+	_onExit {
+		SMCLOptionsFree(options);
+	};
+
+	// Parse.
+	const char *argv[] = {
+		"ut-main",
+		"verb6",
+		"--v6-string", "hello",
+		"--v6-uint32", "4294967295",
+		"--v6-int32", "-2147483648",
+		"--v6-uint64", "18446744073709551615",
+		"--v6-int64", "-9223372036854775808",
+	};
+	
+	SMError				*error = NULL;
+	SMCLOptionsResult	*result = SMCLOptionsParse(options, sizeof(argv) / sizeof(*argv), argv, &error);
+
+	// Test result.
+	XCTAssertSuccess(result, error);
+	
+	// Validate result.
+	SMCLParsedParameterTest expectedResult[] = {
+		{ 	.verb_identifier = 6, .identifier = 14, .value_type = SMCLValueTypeString, .value.str = "hello" },
+		{ 	.verb_identifier = 6, .identifier = 15, .value_type = SMCLValueTypeUInt32, .value.uint32 = UINT32_MAX },
+		{ 	.verb_identifier = 6, .identifier = 16, .value_type = SMCLValueTypeInt32, .value.int32 = INT32_MIN },
+		{ 	.verb_identifier = 6, .identifier = 17, .value_type = SMCLValueTypeUInt64, .value.uint64 = UINT64_MAX },
+		{ 	.verb_identifier = 6, .identifier = 18, .value_type = SMCLValueTypeInt64, .value.int64 = INT64_MIN },
 	};
 	
 	[self validateResult:result testParameters:expectedResult count:sizeof(expectedResult) / sizeof(*expectedResult)];
@@ -1034,6 +1194,136 @@ typedef struct
 	XCTAssertFailure(result, error, SMCLErrorParseUnexpectedExtraArgument);
 }
 
+- (void)testParseTypesError
+{
+	// Get standard options.
+	SMCLOptions *options = [self standardOptions];
+
+	_onExit {
+		SMCLOptionsFree(options);
+	};
+	
+	// Test octal error.
+	const char *argv1[] = { "ut-main", "verb6", "--v6-uint32", "088" };
+	
+	SMError				*error1 = NULL;
+	SMCLOptionsResult	*result1 = SMCLOptionsParse(options, sizeof(argv1) / sizeof(*argv1), argv1, &error1);
+	
+	XCTAssertFailure(result1, error1, SMCLErrorParseInvalidOptionArgument);
+	
+	// Test hexa error.
+	const char *argv2[] = { "ut-main", "verb6", "--v6-uint32", "0xag" };
+	
+	SMError				*error2 = NULL;
+	SMCLOptionsResult	*result2 = SMCLOptionsParse(options, sizeof(argv2) / sizeof(*argv2), argv2, &error2);
+	
+	XCTAssertFailure(result2, error2, SMCLErrorParseInvalidOptionArgument);
+}
+
+- (void)testParseTypesSignedError
+{
+	// Get standard options.
+	SMCLOptions *options = [self standardOptions];
+
+	_onExit {
+		SMCLOptionsFree(options);
+	};
+	
+	// Test uint32 signed error.
+	const char *argv1[] = { "ut-main", "verb6", "--v6-uint32", "-42" };
+	
+	SMError				*error1 = NULL;
+	SMCLOptionsResult	*result1 = SMCLOptionsParse(options, sizeof(argv1) / sizeof(*argv1), argv1, &error1);
+	
+	XCTAssertFailure(result1, error1, SMCLErrorParseInvalidOptionArgument);
+	
+	// Test uint64 signed error.
+	const char *argv2[] = { "ut-main", "verb6", "--v6-uint64", "-51" };
+	
+	SMError				*error2 = NULL;
+	SMCLOptionsResult	*result2 = SMCLOptionsParse(options, sizeof(argv2) / sizeof(*argv2), argv2, &error2);
+	
+	XCTAssertFailure(result2, error2, SMCLErrorParseInvalidOptionArgument);
+}
+
+- (void)testParseTypesUnsignedOverflowError
+{
+	// Get standard options.
+	SMCLOptions *options = [self standardOptions];
+
+	_onExit {
+		SMCLOptionsFree(options);
+	};
+	
+	// Test uint32 overflow error.
+	const char *argv1[] = { "ut-main", "verb6", "--v6-uint32", "4294967296" };
+	
+	SMError				*error1 = NULL;
+	SMCLOptionsResult	*result1 = SMCLOptionsParse(options, sizeof(argv1) / sizeof(*argv1), argv1, &error1);
+	
+	XCTAssertFailure(result1, error1, SMCLErrorParseInvalidOptionArgument);
+	
+	// Test uint64 overflow error.
+	const char *argv2[] = { "ut-main", "verb6", "--v6-uint64", "18446744073709551616" };
+	
+	SMError				*error2 = NULL;
+	SMCLOptionsResult	*result2 = SMCLOptionsParse(options, sizeof(argv2) / sizeof(*argv2), argv2, &error2);
+	
+	XCTAssertFailure(result2, error2, SMCLErrorParseInvalidOptionArgument);
+}
+
+- (void)testParseTypesSignedOverflowError
+{
+	// Get standard options.
+	SMCLOptions *options = [self standardOptions];
+
+	_onExit {
+		SMCLOptionsFree(options);
+	};
+	
+	// Test uint32 overflow error.
+	const char *argv1[] = { "ut-main", "verb6", "--v6-int32", "2147483648" };
+	
+	SMError				*error1 = NULL;
+	SMCLOptionsResult	*result1 = SMCLOptionsParse(options, sizeof(argv1) / sizeof(*argv1), argv1, &error1);
+	
+	XCTAssertFailure(result1, error1, SMCLErrorParseInvalidOptionArgument);
+	
+	// Test uint64 overflow error.
+	const char *argv2[] = { "ut-main", "verb6", "--v6-int64", "9223372036854775808" };
+	
+	SMError				*error2 = NULL;
+	SMCLOptionsResult	*result2 = SMCLOptionsParse(options, sizeof(argv2) / sizeof(*argv2), argv2, &error2);
+	
+	XCTAssertFailure(result2, error2, SMCLErrorParseInvalidOptionArgument);
+}
+
+- (void)testParseTypesSignedUnderflowError
+{
+	// Get standard options.
+	SMCLOptions *options = [self standardOptions];
+
+	_onExit {
+		SMCLOptionsFree(options);
+	};
+	
+	// Test uint32 overflow error.
+	const char *argv1[] = { "ut-main", "verb6", "--v6-int32", "-2147483649" };
+	
+	SMError				*error1 = NULL;
+	SMCLOptionsResult	*result1 = SMCLOptionsParse(options, sizeof(argv1) / sizeof(*argv1), argv1, &error1);
+	
+	XCTAssertFailure(result1, error1, SMCLErrorParseInvalidOptionArgument);
+	
+	// Test uint64 overflow error.
+	const char *argv2[] = { "ut-main", "verb6", "--v6-int64", "-9223372036854775809" };
+	
+	SMError				*error2 = NULL;
+	SMCLOptionsResult	*result2 = SMCLOptionsParse(options, sizeof(argv2) / sizeof(*argv2), argv2, &error2);
+	
+	XCTAssertFailure(result2, error2, SMCLErrorParseInvalidOptionArgument);
+}
+
 #pragma mark - Helpers
 
 - (SMCLOptions *)standardOptions
@@ -1050,9 +1340,9 @@ typedef struct
 
 	SMCLOptionsVerbAddValue(verb2,				0,			"v2-value1",																	"Anonymous value 1 #token-v2-value1");
 	SMCLOptionsVerbAddOption(verb2,				1, false,	"v2-mandatory-nvalue",	0,														"Option 1 #token-v2-option1");
-	SMCLOptionsVerbAddOptionWithArgument(verb2, 2, false,	"v2-mandatory-value",	'a',	SMCLParameterArgumentTypeString, "v2-arg-name",	"Option 2 #token-v2-option2");
+	SMCLOptionsVerbAddOptionWithArgument(verb2, 2, false,	"v2-mandatory-value",	'a',	SMCLValueTypeString, "v2-arg-name",	"Option 2 #token-v2-option2");
 	SMCLOptionsVerbAddOption(verb2,				3, true,	"v2-optional-nvalue",	0,														"Option 3 #token-v2-option3");
-	SMCLOptionsVerbAddOptionWithArgument(verb2, 4, true,	"v2-optional-value",	0,		SMCLParameterArgumentTypeString, NULL, 			"Option 4 #token-v2-option4");
+	SMCLOptionsVerbAddOptionWithArgument(verb2, 4, true,	"v2-optional-value",	0,		SMCLValueTypeString, NULL, 			"Option 4 #token-v2-option4");
 
 	// > Verb-3.
 	SMCLOptionsVerb *verb3 = SMCLOptionsAddVerb(options, 3, "verb3", "This is verb3 #token-verb3");
@@ -1074,6 +1364,15 @@ typedef struct
 
 	SMCLOptionsVerbAddOption(verb5,				12, false,	"v5-option1",		0,															"Option 1 #token-v5-option1");
 	SMCLOptionsVerbAddOption(verb5,				13, true,	"v5-option2",		0,															"Option 2 #token-v5-option2");
+	
+	// > Verb-6.
+	SMCLOptionsVerb *verb6 = SMCLOptionsAddVerb(options, 6, "verb6", "This is verb6");
+
+	SMCLOptionsVerbAddOptionWithArgument(verb6, 14, true,	"v6-string",	0,	SMCLValueTypeString, 	NULL,	"String Option");
+	SMCLOptionsVerbAddOptionWithArgument(verb6, 15, true,	"v6-uint32",	0,	SMCLValueTypeUInt32, 	NULL,	"UInt32 option");
+	SMCLOptionsVerbAddOptionWithArgument(verb6, 16, true,	"v6-int32",		0,	SMCLValueTypeInt32, 	NULL,	"Int32 Option");
+	SMCLOptionsVerbAddOptionWithArgument(verb6, 17, true,	"v6-uint64",	0,	SMCLValueTypeUInt64,	NULL,	"UInt64 option");
+	SMCLOptionsVerbAddOptionWithArgument(verb6, 18, true,	"v6-int64",		0,	SMCLValueTypeInt64,		NULL,	"Int64 option");
 
 	return options;
 }
@@ -1086,17 +1385,67 @@ typedef struct
 
 	for (size_t i = 0; i < count; i++)
 	{
-		uint64_t	identifier = SMCLOptionsResultParameterIdentifierAtIndex(result, i);
-		const char	*value = SMCLOptionsResultParameterValueAtIndex(result, i);
-
+		uint64_t identifier = SMCLOptionsResultParameterIdentifierAtIndex(result, i);
+		
 		XCTAssertEqual(verb_identifier, parameters[i].verb_identifier);
 		XCTAssertEqual(identifier, parameters[i].identifier);
-
-		if ((parameters[i].value == NULL && value != NULL) || (parameters[i].value != NULL && value == NULL))
-			XCTFail(@"unexpected value pointer");
-
-		if (parameters[i].value && value)
-			XCTAssertEqualStrings(parameters[i].value, value);
+		
+		switch (parameters[i].value_type)
+		{
+			case SMCLValueTypeString:
+			{
+				const char	*ref_str = parameters[i].value.str;
+				const char	*test_str = SMCLOptionsResultParameterStringValueAtIndex(result, i);
+				
+				if ((ref_str == NULL && test_str != NULL) || (ref_str != NULL && test_str == NULL))
+					XCTFail(@"unexpected value pointer");
+				
+				if (ref_str && test_str)
+					XCTAssertEqualStrings(ref_str, test_str);
+				
+				break;
+			}
+				
+			case SMCLValueTypeUInt32:
+			{
+				uint32_t ref_val = parameters[i].value.uint32;
+				uint32_t test_val = SMCLOptionsResultParameterUInt32ValueAtIndex(result, i);
+				
+				XCTAssertEqual(ref_val, test_val);
+				
+				break;
+			}
+				
+			case SMCLValueTypeInt32:
+			{
+				int32_t ref_val = parameters[i].value.int32;
+				int32_t test_val = SMCLOptionsResultParameterInt32ValueAtIndex(result, i);
+				
+				XCTAssertEqual(ref_val, test_val);
+				
+				break;
+			}
+				
+			case SMCLValueTypeUInt64:
+			{
+				uint64_t ref_val = parameters[i].value.uint64;
+				uint64_t test_val = SMCLOptionsResultParameterUInt64ValueAtIndex(result, i);
+				
+				XCTAssertEqual(ref_val, test_val);
+				
+				break;
+			}
+				
+			case SMCLValueTypeInt64:
+			{
+				int64_t ref_val = parameters[i].value.int64;
+				int64_t test_val = SMCLOptionsResultParameterInt64ValueAtIndex(result, i);
+				
+				XCTAssertEqual(ref_val, test_val);
+				
+				break;
+			}
+		}
 	}
 }
 

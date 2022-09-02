@@ -41,8 +41,12 @@ typedef struct SMCLOptionsResult	SMCLOptionsResult;
 
 typedef enum
 {
-	SMCLParameterArgumentTypeString,
-} SMCLParameterArgumentType;
+	SMCLValueTypeString,
+	SMCLValueTypeUInt32,
+	SMCLValueTypeInt32,
+	SMCLValueTypeUInt64,
+	SMCLValueTypeInt64,
+} SMCLValueType;
 
 typedef enum
 {
@@ -55,6 +59,7 @@ typedef enum
 	SMCLErrorParseUnkownOption,				// An option in the argument array is unknown.
 	SMCLErrorParseMissingOptionArgument,	// An option in the argument array require an argument, but none is available.
 	SMCLErrorParseMissingParameter,			// A parameter was not optional, but not provided in the argument array.
+	SMCLErrorParseInvalidOptionArgument,	// The argument of an option is expected to be in a specific format, but this format is invalid.
 } SMCLError;
 
 
@@ -82,7 +87,7 @@ SMCLOptionsVerb * SMCLOptionsAddVerb(SMCLOptions *options, uint64_t identifier, 
 void SMCLOptionsVerbAddValue(SMCLOptionsVerb *verb, uint64_t identifier, const char *name, const char *description);
 
 void SMCLOptionsVerbAddOption(SMCLOptionsVerb *verb, uint64_t identifier, bool optional, const char *name, char short_name, const char *description);
-void SMCLOptionsVerbAddOptionWithArgument(SMCLOptionsVerb *verb, uint64_t identifier, bool optional, const char *name, char short_name, SMCLParameterArgumentType argument_type, const char *argument_name, const char *description);
+void SMCLOptionsVerbAddOptionWithArgument(SMCLOptionsVerb *verb, uint64_t identifier, bool optional, const char *name, char short_name, SMCLValueType argument_type, const char *argument_name, const char *description);
 
 // > Usage.
 void SMCLOptionsPrintUsage(SMCLOptions *options, FILE *output);
@@ -94,6 +99,11 @@ uint64_t		SMCLOptionsResultVerbIdentifier(SMCLOptionsResult *result);
 
 size_t			SMCLOptionsResultParametersCount(SMCLOptionsResult *result);
 uint64_t  		SMCLOptionsResultParameterIdentifierAtIndex(SMCLOptionsResult *result, size_t idx);
-const char *	SMCLOptionsResultParameterValueAtIndex(SMCLOptionsResult *result, size_t idx);
+
+const char *	SMCLOptionsResultParameterStringValueAtIndex(SMCLOptionsResult *result, size_t idx);
+uint32_t		SMCLOptionsResultParameterUInt32ValueAtIndex(SMCLOptionsResult *result, size_t idx);
+int32_t			SMCLOptionsResultParameterInt32ValueAtIndex(SMCLOptionsResult *result, size_t idx);
+uint64_t		SMCLOptionsResultParameterUInt64ValueAtIndex(SMCLOptionsResult *result, size_t idx);
+int64_t			SMCLOptionsResultParameterInt64ValueAtIndex(SMCLOptionsResult *result, size_t idx);
 
 void SMCLOptionsResultFree(SMCLOptionsResult *result);
