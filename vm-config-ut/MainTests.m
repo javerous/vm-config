@@ -709,6 +709,8 @@ typedef struct
 		XCTAssertEqualStrings(SMVMwareVMXEntryGetValue(vmx_entry, NULL), test_entry->value);
 	}
 	
+	SMVMwareVMXFree(vmx);
+	
 	// Check NVRAM.
 	SMVMwareNVRAM *nvram = SMVMwareNVRAMOpen(nvramPath.fileSystemRepresentation, &error);
 
@@ -727,6 +729,8 @@ typedef struct
 		XCTAssertEqual(value_size, test_variable->value_size);
 		XCTAssertEqual(memcmp(value, test_variable->value, value_size), 0);
 	}
+	
+	SMVMwareNVRAMFree(nvram);
 }
 
 @end
