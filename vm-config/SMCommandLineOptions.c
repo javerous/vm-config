@@ -70,9 +70,9 @@ typedef struct
 	char	*name;
 	char	short_name;
 	
-	bool						has_argument;
-	SMCLParameterArgumentType	argument_type;
-	char						*argument_name;
+	bool			has_argument;
+	SMCLValueType	argument_type;
+	char			*argument_name;
 	
 	char *description;
 	
@@ -97,15 +97,26 @@ struct SMCLOptionsVerb
 	
 };
 
+typedef struct SMCLOptionsResultParameter
+{
+	uint64_t identifier;
+	
+	SMCLValueType value_type;
+	union {
+		char		*str;
+		uint64_t	uint64;
+		int64_t		int64;
+		uint32_t	uint32;
+		int32_t		int32;
+	} value;
+} SMCLOptionsResultParameter;
+
 struct SMCLOptionsResult
 {
 	uint64_t verb_identifier;
 	
-	struct {
-		uint64_t identifier;
-		char *value;
-	} *parameters;
-	size_t parameters_count;
+	SMCLOptionsResultParameter	*parameters;
+	size_t						parameters_count;
 };
 
 
@@ -131,6 +142,15 @@ static char * SMCLFormatParameterName(SMCLOptionsParameter *parameter);
 
 // Parsing.
 static SMCLOptionsArgumentType SMCLOptionsSenseArgument(const char *argument, const char **content);
+
+// Integers.
+static bool SMCLParseUInt64(const char *str, uint64_t *result, SMError **error);
+static bool SMCLParseInt64(const char *str, int64_t *result, SMError **error);
+
+static bool SMCLParseUInt32(const char *str, uint32_t *result, SMError **error);
+static bool SMCLParseInt32(const char *str, int32_t *result, SMError **error);
+
+static bool SMCLParseRawInteger(const char *str, uint64_t *result, bool *negative, SMError **error);
 
 
 /*
@@ -229,7 +249,7 @@ void SMCLOptionsVerbAddOption(SMCLOptionsVerb *verb, uint64_t identifier, bool o
 	parameter->description =strdup(description);
 }
 
-void SMCLOptionsVerbAddOptionWithArgument(SMCLOptionsVerb *verb, uint64_t identifier, bool optional, const char *name, char short_name, SMCLParameterArgumentType argument_type, const char *argument_name, const char *description)
+void SMCLOptionsVerbAddOptionWithArgument(SMCLOptionsVerb *verb, uint64_t identifier, bool optional, const char *name, char short_name, SMCLValueType argument_type, const char *argument_name, const char *description)
 {
 	SMCLOptionsParameter *parameter = SMCLVerbAddParameter(verb);
 	
@@ -376,8 +396,15 @@ static char * SMCLFormatParameterName(SMCLOptionsParameter *parameter)
 
 				switch (parameter->argument_type)
 				{
-					case SMCLParameterArgumentTypeString:
+					case SMCLValueTypeString:
 						default_argument_name = "string";
+						break;
+						
+					case SMCLValueTypeUInt32:
+					case SMCLValueTypeInt32:
+					case SMCLValueTypeUInt64:
+					case SMCLValueTypeInt64:
+						default_argument_name = "integer";
 						break;
 				}
 				
@@ -464,9 +491,10 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 
 	for (int arg_idx = 2; arg_idx < argc; arg_idx++)
 	{
-		const char	*arg = argv[arg_idx];
-		const char	*param_value = NULL;
-		uint64_t	param_idenfier = 0;
+		const char		*arg = argv[arg_idx];
+		SMCLValueType	param_type = SMCLValueTypeString;
+		const char		*param_value = NULL;
+		uint64_t		param_identifier = 0;
 		
 		// > Sense type of argument.
 		const char 				*arg_content = NULL;
@@ -501,7 +529,7 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 				
 				// > Handle parameter.
 				param_value = arg;
-				param_idenfier = parameters[param_idx].identifier;
+				param_identifier = parameters[param_idx].identifier;
 				
 				// > Mark parameter as handled.
 				parameters[param_idx].handled = true;
@@ -557,21 +585,16 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 						goto fail;
 					}
 					
-					// > Handle argument type.
-					const char *argument_str = argv[arg_idx + 1];
-										
+					// > Handle argument.
+					param_value = argv[arg_idx + 1];
+					param_type = match_parameter->argument_type;
+									
+					// > Skip item.
 					arg_idx++;
-
-					switch (match_parameter->argument_type)
-					{
-						case SMCLParameterArgumentTypeString:
-							param_value = argument_str;
-							break;
-					}
 				}
 				
 				// > Handle parameter.
-				param_idenfier = match_parameter->identifier;
+				param_identifier = match_parameter->identifier;
 
 				// > Mark parameter as handled.
 				match_parameter->handled = true;
@@ -581,13 +604,60 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 		}
 		
 		// Everything valid: add entry to result.
+		// > Add entry.
+		SMCLOptionsResultParameter *result_parameter;
+		
 		result->parameters = reallocf(result->parameters, (result->parameters_count + 1) * sizeof(*result->parameters));
 		
 		assert(result->parameters);
 		
-		result->parameters[result->parameters_count].identifier = param_idenfier;
-		result->parameters[result->parameters_count].value = param_value ? strdup(param_value) : NULL;
+		result_parameter = &result->parameters[result->parameters_count];
 		result->parameters_count++;
+		
+		// > Store identifier.
+		result_parameter->identifier = param_identifier;
+
+		// > Store value.
+		result_parameter->value_type = param_type;
+		
+		switch (param_type)
+		{
+			case SMCLValueTypeString:
+				result_parameter->value.str = param_value ? strdup(param_value) : NULL;
+				break;
+				
+			case SMCLValueTypeUInt32:
+			{
+				if (!SMCLParseUInt32(param_value, &result_parameter->value.uint32, error))
+					goto fail;
+				
+				break;
+			}
+				
+			case SMCLValueTypeInt32:
+			{
+				if (!SMCLParseInt32(param_value, &result_parameter->value.int32, error))
+					goto fail;
+				
+				break;
+			}
+				
+			case SMCLValueTypeUInt64:
+			{
+				if (!SMCLParseUInt64(param_value, &result_parameter->value.uint64, error))
+					goto fail;
+				
+				break;
+			}
+				
+			case SMCLValueTypeInt64:
+			{
+				if (!SMCLParseInt64(param_value, &result_parameter->value.int64, error))
+					goto fail;
+				
+				break;
+			}
+		}
 		
 		// > Skip all handled parameters, so we don't re-handle multiple time same parameters, like values which are not named.
 		for (; param_idx < verb->parameters_count && parameters[param_idx].handled; param_idx++)
@@ -638,10 +708,46 @@ uint64_t SMCLOptionsResultParameterIdentifierAtIndex(SMCLOptionsResult *result, 
 	return result->parameters[idx].identifier;
 }
 
-const char * SMCLOptionsResultParameterValueAtIndex(SMCLOptionsResult *result, size_t idx)
+const char * SMCLOptionsResultParameterStringValueAtIndex(SMCLOptionsResult *result, size_t idx)
 {
-	return result->parameters[idx].value;
+	if (result->parameters[idx].value_type != SMCLValueTypeString)
+		return NULL;
+	
+	return result->parameters[idx].value.str;
 }
+
+uint32_t SMCLOptionsResultParameterUInt32ValueAtIndex(SMCLOptionsResult *result, size_t idx)
+{
+	if (result->parameters[idx].value_type != SMCLValueTypeUInt32)
+		return 0;
+	
+	return result->parameters[idx].value.uint32;
+}
+
+int32_t SMCLOptionsResultParameterInt32ValueAtIndex(SMCLOptionsResult *result, size_t idx)
+{
+	if (result->parameters[idx].value_type != SMCLValueTypeInt32)
+		return 0;
+	
+	return result->parameters[idx].value.int32;
+}
+
+uint64_t SMCLOptionsResultParameterUInt64ValueAtIndex(SMCLOptionsResult *result, size_t idx)
+{
+	if (result->parameters[idx].value_type != SMCLValueTypeUInt64)
+		return 0;
+	
+	return result->parameters[idx].value.uint64;
+}
+
+int64_t SMCLOptionsResultParameterInt64ValueAtIndex(SMCLOptionsResult *result, size_t idx)
+{
+	if (result->parameters[idx].value_type != SMCLValueTypeInt64)
+		return 0;
+	
+	return result->parameters[idx].value.int64;
+}
+
 
 void SMCLOptionsResultFree(SMCLOptionsResult *result)
 {
@@ -649,7 +755,10 @@ void SMCLOptionsResultFree(SMCLOptionsResult *result)
 		return;
 	
 	for (size_t i = 0; i < result->parameters_count; i++)
-		free(result->parameters[i].value);
+	{
+		if (result->parameters[i].value_type == SMCLValueTypeString)
+			free(result->parameters[i].value.str);
+	}
 	
 	free(result->parameters);
 	free(result);
@@ -658,6 +767,7 @@ void SMCLOptionsResultFree(SMCLOptionsResult *result)
 
 #pragma mark > Helpers
 
+// Parsing.
 static SMCLOptionsArgumentType SMCLOptionsSenseArgument(const char *argument, const char **content)
 {
 	size_t len = strlen(argument);
@@ -686,4 +796,207 @@ static SMCLOptionsArgumentType SMCLOptionsSenseArgument(const char *argument, co
 		*content = argument;
 	
 	return SMCLOptionsArgumentTypeValue;
+}
+
+// Integers.
+#define SMCLGenerateUnsignedCodeHandling 																												\
+	uint64_t	lresult = 0;																															\
+	bool		negative = false;																														\
+																																						\
+	if (!SMCLParseRawInteger(str, &lresult, &negative, error))																							\
+		return false;																																	\
+																																						\
+	if (negative)																																		\
+	{																																					\
+		SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "expected unsigned integer but got signed integer");	\
+		return false;																																	\
+	}																																					\
+																																						\
+	if (__builtin_add_overflow(lresult, 0, result))																										\
+	{																																					\
+		SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");									\
+		return false;																																	\
+	}																																					\
+																																						\
+	return true
+
+#define SMCLGenerateSignedCodeHandling 																													\
+	uint64_t	lresult = 0;																															\
+	bool		negative = false;																														\
+																																						\
+	if (!SMCLParseRawInteger(str, &lresult, &negative, error))																							\
+		return false;																																	\
+																																						\
+	if (negative)																																		\
+	{																																					\
+		if (__builtin_mul_overflow(lresult, -1, result))																								\
+		{																																				\
+			SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer underflow");								\
+			return false;																																\
+		}																																				\
+																																						\
+		return true;																																	\
+	}																																					\
+	else																																				\
+	{																																					\
+		if (__builtin_add_overflow(lresult, 0, result))																									\
+		{																																				\
+			SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");								\
+			return false;																																\
+		}																																				\
+																																						\
+		return true;																																	\
+	}																																					\
+
+
+static bool SMCLParseUInt64(const char *str, uint64_t *result, SMError **error)
+{
+	SMCLGenerateUnsignedCodeHandling;
+}
+
+static bool SMCLParseInt64(const char *str, int64_t *result, SMError **error)
+{
+	SMCLGenerateSignedCodeHandling;
+}
+
+static bool SMCLParseUInt32(const char *str, uint32_t *result, SMError **error)
+{
+	SMCLGenerateUnsignedCodeHandling;
+}
+
+static bool SMCLParseInt32(const char *str, int32_t *result, SMError **error)
+{
+	SMCLGenerateSignedCodeHandling;
+}
+
+static bool SMCLParseRawInteger(const char *str, uint64_t *result, bool *negative, SMError **error)
+{
+	// Sanity.
+	if (*str == 0)
+	{
+		SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "empty string");
+		return false;
+	}
+	
+	// Handle negative.
+	if (str[0] == '-')
+	{
+		*negative = true;
+		str++;
+	}
+	else
+		*negative = false;
+	
+	// Handle hexa.
+	uint64_t lresult = 0;
+
+	if (str[0] == '0' && str[1] == 'x')
+	{
+		str += 2;
+		
+		while (*str)
+		{
+			unsigned	add = 0;
+			char		ch = *str;
+			
+			if (ch >= '0' && ch <= '9')
+				add = ch - '0';
+			else if (ch >= 'a' && ch <= 'f')
+				add = (ch - 'a') + 10;
+			else if (ch >= 'A' && ch <= 'F')
+				add = (ch - 'A') + 10;
+			else
+			{
+				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "invalid character '%c' in hexadecimal value", ch);
+				return false;
+			}
+			
+			if (__builtin_mul_overflow(lresult, (uint64_t)16, &lresult))
+			{
+				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
+				return false;
+
+			}
+			
+			if (__builtin_add_overflow(lresult, (uint64_t)add, &lresult))
+			{
+				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
+				return false;
+			}
+			
+			str++;
+		}
+	}
+	
+	// Handle octal.
+	else if (str[0] == '0')
+	{
+		str += 1;
+		
+		while (*str)
+		{
+			unsigned	add = 0;
+			char		ch = *str;
+			
+			if (ch >= '0' && ch <= '7')
+				add = ch - '0';
+			else
+			{
+				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "invalid character '%c' in octal value", ch);
+				return false;
+			}
+			
+			if (__builtin_mul_overflow(lresult, (uint64_t)8, &lresult))
+			{
+				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
+				return false;
+
+			}
+			
+			if (__builtin_add_overflow(lresult, (uint64_t)add, &lresult))
+			{
+				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
+				return false;
+			}
+			
+			str++;
+		}
+	}
+	
+	// Handle decimal.
+	else
+	{
+		while (*str)
+		{
+			unsigned	add = 0;
+			char		ch = *str;
+			
+			if (ch >= '0' && ch <= '9')
+				add = ch - '0';
+			else
+			{
+				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "invalid character '%c' in decimal value", ch);
+				return false;
+			}
+			
+			if (__builtin_mul_overflow(lresult, (uint64_t)10, &lresult))
+			{
+				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
+				return false;
+
+			}
+			
+			if (__builtin_add_overflow(lresult, (uint64_t)add, &lresult))
+			{
+				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidOptionArgument, "integer overflow");
+				return false;
+			}
+			
+			str++;
+		}
+	}
+	
+	// Success.
+	*result = lresult;
+	return true;
 }

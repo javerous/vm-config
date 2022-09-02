@@ -153,20 +153,20 @@ int internal_main(int argc, const char * argv[], FILE *fout, FILE *ferr)
 	SMCLOptionsVerbAddOption(show_verb, 			SMMainShowVMX, 						true,	"vmx", 					0,											"Show vmx file content");
 	SMCLOptionsVerbAddOption(show_verb, 			SMMainShowNVRAM,					true,	"nvram", 				0,											"Show nvram file content");
 	SMCLOptionsVerbAddOption(show_verb, 			SMMainShowNVRAMEFIVariables,		true,	"nvram-efi-variables",	0,											"Show nvram efi variables");
-	SMCLOptionsVerbAddOptionWithArgument(show_verb,	SMMainShowNVRAMEFIVariable,			true,	"nvram-efi-variable",	0, SMCLParameterArgumentTypeString, "name",	"Show nvram efi variable with this name");
+	SMCLOptionsVerbAddOptionWithArgument(show_verb,	SMMainShowNVRAMEFIVariable,			true,	"nvram-efi-variable",	0, SMCLValueTypeString,		"name",			"Show nvram efi variable with this name");
 	
 	// > change.
 	SMCLOptionsVerb *change_verb = SMCLOptionsAddVerb(options, SMMainVerbChange, "change", "Change configuration of a virtual machine bundle");
 
-	SMCLOptionsVerbAddValue(change_verb,				SMMainChangeVM,							"vmwarevm",																		"Path to the virtual machine .vmwarevm bundle");
-	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeBootArgs, 			true,	"boot-args", 			0,  SMCLParameterArgumentTypeString,	"key=value",	"Set boot arguments");
-	SMCLOptionsVerbAddOption(change_verb,				SMMainChangeCSREnable, 			true,	"csr-enable", 			0,														"Similar to 'csrutil enable'");
-	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeCSREnableVersion, 	true,	"csr-enable-version", 	0,  SMCLParameterArgumentTypeString,	"version",		"Similar to 'csrutil enable' for a specific macOS version");
-	SMCLOptionsVerbAddOption(change_verb,				SMMainChangeCSRDisable, 		true,	"csr-disable", 			0, 														"Similar to 'csrutil disable'");
-	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeCSRDisableVersion, 	true,	"csr-disable-version", 	0,  SMCLParameterArgumentTypeString,	"version",		"Similar to 'csrutil disable' for a specific macOS version");
-	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeCSRFlags, 			true,	"csr-flags", 			0,  SMCLParameterArgumentTypeString,	"flags",		"Set Configurable Security Restrictions flags");
-	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeMachineUUID, 		true,	"machine-uuid", 		0,  SMCLParameterArgumentTypeString,	"uuid",			"Set machine UUID");
-	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeScreenResolution, 	true,	"screen-resolution",	0,  SMCLParameterArgumentTypeString,	"WxH",			"Set screen resolution, width x height, e.g. '1920x1080'");
+	SMCLOptionsVerbAddValue(change_verb,				SMMainChangeVM,							"vmwarevm",															"Path to the virtual machine .vmwarevm bundle");
+	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeBootArgs, 			true,	"boot-args", 			0,  SMCLValueTypeString,	"key=value",	"Set boot arguments");
+	SMCLOptionsVerbAddOption(change_verb,				SMMainChangeCSREnable, 			true,	"csr-enable", 			0,											"Similar to 'csrutil enable'");
+	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeCSREnableVersion, 	true,	"csr-enable-version", 	0,  SMCLValueTypeString,	"version",		"Similar to 'csrutil enable' for a specific macOS version");
+	SMCLOptionsVerbAddOption(change_verb,				SMMainChangeCSRDisable, 		true,	"csr-disable", 			0, 											"Similar to 'csrutil disable'");
+	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeCSRDisableVersion, 	true,	"csr-disable-version", 	0,  SMCLValueTypeString,	"version",		"Similar to 'csrutil disable' for a specific macOS version");
+	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeCSRFlags, 			true,	"csr-flags", 			0,  SMCLValueTypeUInt32,	"flags",		"Set Configurable Security Restrictions flags");
+	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeMachineUUID, 		true,	"machine-uuid", 		0,  SMCLValueTypeString,	"uuid",			"Set machine UUID");
+	SMCLOptionsVerbAddOptionWithArgument(change_verb,	SMMainChangeScreenResolution, 	true,	"screen-resolution",	0,  SMCLValueTypeString,	"WxH",			"Set screen resolution, width x height, e.g. '1920x1080'");
 	
 	// Parse options.
 	SMError				*error = NULL;
@@ -233,7 +233,7 @@ static int main_show(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 		{
 			case SMMainShowVM:
 			{
-				vm_path = SMCLOptionsResultParameterValueAtIndex(opt_result, i);
+				vm_path = SMCLOptionsResultParameterStringValueAtIndex(opt_result, i);
 				break;
 			}
 				
@@ -268,7 +268,7 @@ static int main_show(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 				
 			case SMMainShowNVRAMEFIVariable:
 			{
-				show_nvram_efi_variable = SMCLOptionsResultParameterValueAtIndex(opt_result, i);
+				show_nvram_efi_variable = SMCLOptionsResultParameterStringValueAtIndex(opt_result, i);
 				break;
 			}
 		}
@@ -604,7 +604,7 @@ static int main_change(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 		{
 			case SMMainChangeVM:
 			{
-				vm_path = SMCLOptionsResultParameterValueAtIndex(opt_result, i);
+				vm_path = SMCLOptionsResultParameterStringValueAtIndex(opt_result, i);
 				break;
 			}
 				
@@ -620,7 +620,7 @@ static int main_change(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 				}
 
 				// Set boot arguments.
-				if (!SMVMwareNVRAMSetBootArgs(nvram, SMCLOptionsResultParameterValueAtIndex(opt_result, i), &error))
+				if (!SMVMwareNVRAMSetBootArgs(nvram, SMCLOptionsResultParameterStringValueAtIndex(opt_result, i), &error))
 					goto fail;
 				
 				break;
@@ -636,7 +636,7 @@ static int main_change(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 				// Parse version.
 				if (mainChangeOp == SMMainChangeCSREnableVersion || mainChangeOp == SMMainChangeCSRDisableVersion)
 				{
-					macos_version = SMVersionFromString(SMCLOptionsResultParameterValueAtIndex(opt_result, i), &error);
+					macos_version = SMVersionFromString(SMCLOptionsResultParameterStringValueAtIndex(opt_result, i), &error);
 
 					if (SMVersionIsEqual(macos_version, SMVersionInvalid))
 						goto fail;
@@ -685,26 +685,7 @@ static int main_change(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 				
 			case SMMainChangeCSRFlags:
 			{
-				// Parse integer.
-				//
-				// Why those libc functions have to be so... "chaotic evil"...
-				// I think I handled all errors possible from what I understand of the man page, but who know ?
-				
-				errno = 0;
-
-				const char			*value = SMCLOptionsResultParameterValueAtIndex(opt_result, i);
-				char				*endp = NULL;
-				unsigned long long	result = strtoull(value, &endp, 16);
-				uint32_t 			new_csr = 0;
-				
-				if ((*value == 0) || !endp || *endp != 0 || ((result == ULONG_MAX || result == 0) && errno != 0) || result > UINT32_MAX)
-				{
-#warning FIXME: Add a new SMCLParameterArgumentType, and handle this check as part of SMCommandLineOptions handling.
-					fprintf(ferr, "Error: Invalid value '%s'.\n", value);
-					goto fail;
-				}
-				
-				new_csr = (uint32_t)result;
+				uint32_t new_csr = SMCLOptionsResultParameterUInt32ValueAtIndex(opt_result, i);
 				
 				// Open NVRAM file.
 				SMVMwareNVRAM *nvram = SMGetNVRAMFromVM(vm_path, &g_vmx, &g_nvram, &error);
@@ -725,7 +706,7 @@ static int main_change(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 			case SMMainChangeMachineUUID:
 			{
 				// Parse UUID.
-				const char	*uuid_str = SMCLOptionsResultParameterValueAtIndex(opt_result, i);;
+				const char	*uuid_str = SMCLOptionsResultParameterStringValueAtIndex(opt_result, i);;
 				uuid_t		uuid;
 				
 				if (uuid_parse(uuid_str, uuid) == -1)
@@ -766,7 +747,7 @@ static int main_change(SMCLOptionsResult *opt_result, FILE *fout, FILE *ferr)
 			case SMMainChangeScreenResolution:
 			{
 				// Parse screen resolution.
-				const char		*value = SMCLOptionsResultParameterValueAtIndex(opt_result, i);
+				const char		*value = SMCLOptionsResultParameterStringValueAtIndex(opt_result, i);
 				unsigned int	width = 0, height = 0;
 				size_t			optarg_len = strlen(value);
 				int				scan_len = 0;
