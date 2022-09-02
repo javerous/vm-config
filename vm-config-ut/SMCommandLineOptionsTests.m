@@ -1385,12 +1385,14 @@ typedef struct
 
 	for (size_t i = 0; i < count; i++)
 	{
-		uint64_t identifier = SMCLOptionsResultParameterIdentifierAtIndex(result, i);
+		uint64_t 		identifier = SMCLOptionsResultParameterIdentifierAtIndex(result, i);
+		SMCLValueType	type = SMCLOptionsResultParameterTypeAtIndex(result, i);
 		
 		XCTAssertEqual(verb_identifier, parameters[i].verb_identifier);
 		XCTAssertEqual(identifier, parameters[i].identifier);
-		
-		switch (parameters[i].value_type)
+		XCTAssertEqual(type, parameters[i].value_type);
+				
+		switch (type)
 		{
 			case SMCLValueTypeString:
 			{
