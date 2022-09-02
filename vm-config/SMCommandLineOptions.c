@@ -417,13 +417,13 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 	// Check input.
 	if (argc <= 0 || !argv)
 	{
-		SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, -1, "invalid argument array passed");
+		SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseInvalidArgumentsArray, "invalid argument array passed");
 		goto fail;
 	}
 	
 	if (argc == 1)
 	{
-		SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, -1, "missing verb");
+		SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseMissingVerb, "missing verb");
 		goto fail;
 	}
 	
@@ -442,7 +442,7 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 	
 	if (!verb)
 	{
-		SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, -1, "unknow verb '%s'", verb_str);
+		SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseUnknowVerb, "unknow verb '%s'", verb_str);
 		goto fail;
 	}
 	
@@ -465,13 +465,13 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 		// > Sense type of argument.
 		const char 				*arg_content = NULL;
 		SMCLOptionsArgumentType	arg_type = SMCLOptionsSenseArgument(arg, &arg_content);
-		
+				
 		switch (arg_type)
 		{
 			// > Invalid argument: fail.
 			case SMCLOptionsArgumentTypeInvalid:
 			{
-				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, -1, "unexpected argument '%s'", arg);
+				SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseUnexpectedArgument, "unexpected argument '%s'", arg);
 				goto fail;
 			}
 			
@@ -485,7 +485,7 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 				// > Check we still have parameters to handle.
 				if (param_idx >= verb->parameters_count)
 				{
-					SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, -1, "unexpected extra argument value '%s'", arg);
+					SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseUnexpectedExtraArgument, "unexpected extra argument value '%s'", arg);
 					goto fail;
 				}
 
@@ -510,7 +510,7 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 				// > Check we still have parameters to handle.
 				if (param_idx >= verb->parameters_count)
 				{
-					SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, -1, "unexpected extra option '%s'", arg);
+					SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseUnexpectedExtraArgument, "unexpected extra option '%s'", arg);
 					goto fail;
 				}
 
@@ -538,7 +538,7 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 				// > Didn't find anything: fail.
 				if (!match_parameter)
 				{
-					SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, -1, "unknow option '%s'", arg);
+					SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseUnkownOption, "unknow option '%s'", arg);
 					goto fail;
 				}
 				
@@ -547,13 +547,13 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 				{
 					if (arg_idx + 1 >= argc)
 					{
-						SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, -1, "missing argument for option '%s'", arg);
+						SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseMissingOptionArgument, "missing argument for option '%s'", arg);
 						goto fail;
 					}
 					
 					// > Handle argument type.
 					const char *argument_str = argv[arg_idx + 1];
-					
+										
 					arg_idx++;
 
 					switch (match_parameter->argument_type)
@@ -596,11 +596,11 @@ SMCLOptionsResult * SMCLOptionsParse(SMCLOptions *options, int argc, const char 
 			switch (parameters[i].type)
 			{
 				case SMCLOptionsParameterTypeValue:
-					SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, -1, "missing value '%s'", parameters[i].name);
+					SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseMissingParameter, "missing value '%s'", parameters[i].name);
 					break;
 					
 				case SMCLOptionsParameterTypeOption:
-					SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, -1, "missing option '%s'", parameters[i].name);
+					SMSetErrorPtr(error, SMCommanLineOptionsErrorDomain, SMCLErrorParseMissingParameter, "missing option '%s'", parameters[i].name);
 					break;
 			}
 			
