@@ -162,6 +162,8 @@ SMVMwareVMX * SMVMwareVMXOpen(const char *vmx_file_path, SMError **error)
 		char 				*clean_line = SMStringTrimCharacter(line, gBlanckAndNewlineCharacters, sizeof(gBlanckAndNewlineCharacters), false);
 		SMVMwareVMXEntry	*entry = SMVMwareVMXEntryCreateFromLine(clean_line, line_idx, error);
 		
+		free(clean_line);
+		
 		if (!entry)
 		{
 			free(line);

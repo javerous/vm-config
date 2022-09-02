@@ -92,6 +92,7 @@ typedef struct
 	self.continueAfterFailure = NO;
 }
 
+
 #pragma mark - Tests
 
 - (void)testUsage

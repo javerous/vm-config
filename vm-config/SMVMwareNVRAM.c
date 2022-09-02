@@ -341,6 +341,8 @@ void SMVMwareNVRAMFree(SMVMwareNVRAM *nvram)
 	if (!nvram)
 		return;
 	
+	free(nvram->path);
+	
 	// Free entries.
 	for (size_t i = 0; i < nvram->entries_cnt; i++)
 		SMVMwareNVRAMEntryFree(nvram->entries[i]);

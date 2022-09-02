@@ -42,6 +42,8 @@
 */
 #pragma mark - Defines
 
+#define CHECK_LEAKS 0
+
 #define XCTAssertDefaultMain(ExpectedExit) 															\
 	SMDeclareDefaultFiles;																			\
 	XCTAssertEqual(internal_main(sizeof(argv) / sizeof(*argv), argv, fout, ferr), ExpectedExit);	\
@@ -102,6 +104,19 @@ typedef struct
 
 - (void)tearDown
 {
+#if defined(CHECK_LEAKS) && CHECK_LEAKS
+	NSTask *task = [[NSTask alloc] init];
+	
+	task.executableURL = [NSURL fileURLWithPath:@"/usr/bin/leaks"];
+	task.arguments = @[ [@(getpid()) stringValue] ];
+	
+	[task launch];
+	[task waitUntilExit];
+	
+	if (task.terminationReason == NSTaskTerminationReasonExit && task.terminationStatus != 0)
+		XCTFail(@"Found a leaks");
+#endif
+	
 	[[NSFileManager defaultManager] removeItemAtPath:_testDirectory error:nil];
 }
 
