@@ -153,7 +153,7 @@ int internal_main(int argc, const char * argv[], FILE *fout, FILE *ferr)
 	SMCLOptionsVerbAddOption(show_verb, 			SMMainShowVMX, 						true,	"vmx", 					0,											"Show vmx file content");
 	SMCLOptionsVerbAddOption(show_verb, 			SMMainShowNVRAM,					true,	"nvram", 				0,											"Show nvram file content");
 	SMCLOptionsVerbAddOption(show_verb, 			SMMainShowNVRAMEFIVariables,		true,	"nvram-efi-variables",	0,											"Show nvram efi variables");
-	SMCLOptionsVerbAddOptionWithArgument(show_verb,	SMMainShowNVRAMEFIVariable,			true,	"nvram-efi-variable",	0, SMCLParameterArgumentTypeString, "name",	"Show nvram efi the variable with this name");
+	SMCLOptionsVerbAddOptionWithArgument(show_verb,	SMMainShowNVRAMEFIVariable,			true,	"nvram-efi-variable",	0, SMCLParameterArgumentTypeString, "name",	"Show nvram efi variable with this name");
 	
 	// > change.
 	SMCLOptionsVerb *change_verb = SMCLOptionsAddVerb(options, SMMainVerbChange, "change", "Change configuration of a virtual machine bundle");
