@@ -328,7 +328,6 @@ void SMCLOptionsPrintUsage(SMCLOptions *options, FILE *output)
 			size_t					right_param_padding_size = max_left_size - (SMCLUsageParametersIdentation + strlen(formatted_param)) + SMCLUsageParameterDescriptionOffset;
 			char 					*left_param_padding = malloc(SMCLUsageParametersIdentation + 1);
 			char 					*right_param_padding = malloc(right_param_padding_size + 1);
-			const char				*optional_string;
 			
 			assert(left_param_padding);
 			assert(right_param_padding);
@@ -338,13 +337,8 @@ void SMCLOptionsPrintUsage(SMCLOptions *options, FILE *output)
 			
 			left_param_padding[SMCLUsageParametersIdentation] = 0;
 			right_param_padding[right_param_padding_size] = 0;
-			
-			if (parameter->optional)
-				optional_string = "Optional - ";
-			else
-				optional_string = "";
-			
-			fprintf(output, "%s%s%s%s%s\n", left_param_padding, formatted_param, right_param_padding, optional_string, parameter->description);
+
+			fprintf(output, "%s%s%s%s\n", left_param_padding, formatted_param, right_param_padding, parameter->description);
 						
 			free(formatted_param);
 			free(left_param_padding);
@@ -373,8 +367,9 @@ static char * SMCLFormatParameterName(SMCLOptionsParameter *parameter)
 			
 		case SMCLOptionsParameterTypeOption:
 		{
+			// > Forge argument name part.
 			char *argument_name = NULL;
-			
+
 			if (parameter->has_argument)
 			{
 				const char *default_argument_name = NULL;
@@ -389,10 +384,21 @@ static char * SMCLFormatParameterName(SMCLOptionsParameter *parameter)
 				asprintf(&argument_name, " <%s>", parameter->argument_name ?: default_argument_name);
 			}
 			
+			// > Forge optional decoration.
+			const char *optional_open = "";
+			const char *optional_close = "";
+
+			if (parameter->optional)
+			{
+				optional_open = "[";
+				optional_close = "]";
+			}
+			
+			// > Forge whole argument.
 			if (isprint(parameter->short_name))
-				asprintf(&result, "-%c, --%s%s", parameter->short_name, parameter->name, argument_name ?: "");
+				asprintf(&result, "%s-%c, --%s%s%s", optional_open, parameter->short_name, parameter->name, argument_name ?: "", optional_close);
 			else
-				asprintf(&result, "--%s%s", parameter->name, argument_name ?: "");
+				asprintf(&result, "%s--%s%s%s", optional_open, parameter->name, argument_name ?: "", optional_close);
 			
 			free(argument_name);
 			
