@@ -29,10 +29,12 @@
 #import "SMTestsTools.h"
 
 #import "SMVMwareVMX.h"
-#import "SMVMwareNVRAM.h"
-
 #import "SMVMwareVMXHelper.h"
 
+#import "SMVMwareNVRAM.h"
+#import "SMVMwareNVRAMHelper.h"
+
+#import "SMVMwareVMXHelper.h"
 
 
 /*
@@ -45,6 +47,30 @@
 	XCTAssertEqual(internal_main(sizeof(argv) / sizeof(*argv), argv, fout, ferr), ExpectedExit);	\
 	fflush(fout); 																					\
 	fflush(ferr)
+
+
+/*
+** Types
+*/
+#pragma mark - Types
+
+typedef struct
+{
+	const char *key;
+	const char *value;
+} SMVMXEntryTest;
+
+typedef struct
+{
+	efi_guid_t guid;
+	
+	const char *name;
+	
+	uint8_t	value[100];
+	size_t	value_size;
+} SMNVRAMEFIVariableTest;
+
+
 
 
 /*
@@ -71,7 +97,7 @@
 	
 	NSAssert([[NSFileManager defaultManager] createDirectoryAtPath:_testDirectory withIntermediateDirectories:YES attributes:nil error:nil], @"cannot create temp directory");
 	
-	NSLog(@"-> '%@'", _testDirectory);
+	self.continueAfterFailure = NO;
 }
 
 - (void)tearDown
@@ -79,22 +105,26 @@
 	[[NSFileManager defaultManager] removeItemAtPath:_testDirectory error:nil];
 }
 
+
 #pragma mark - Tests
 
 - (void)testNotArguments
 {
+	// Test main.
 	const char *argv[] = {
 		"ut-main"
 	};
 		
 	XCTAssertDefaultMain(SMMainExitInvalidArgs);
 	
+	// Check output.
 	XCTAssertEqual(sout, 0);
 	XCTAssertGreaterThan(serr, 20);
 }
 
 - (void)testVersion
 {
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"version"
@@ -102,12 +132,14 @@
 	
 	XCTAssertDefaultMain(SMMainExitSuccess);
 	
+	// Check output.
 	XCTAssertContainString(*bout, sout, "version");
 	XCTAssertEqual(serr, 0);
 }
 
 - (void)testInvalidVerb
 {
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"invalid-verb"
@@ -115,6 +147,7 @@
 	
 	XCTAssertDefaultMain(SMMainExitInvalidArgs);
 	
+	// Check output.
 	XCTAssertEqual(sout, 0);
 	XCTAssertContainString(*berr, serr, "Error");
 }
@@ -124,6 +157,7 @@
 
 - (void)testShowError
 {
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"show",
@@ -131,12 +165,14 @@
 	
 	XCTAssertDefaultMain(SMMainExitInvalidArgs);
 	
+	// Check output.
 	XCTAssertEqual(sout, 0);
 	XCTAssertContainString(*berr, serr, "Error");
 }
 
 - (void)testShowExtraArgs
 {
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"show",
@@ -147,12 +183,14 @@
 	
 	XCTAssertDefaultMain(SMMainExitInvalidArgs);
 	
+	// Check output.
 	XCTAssertEqual(sout, 0);
 	XCTAssertContainString(*berr, serr, "Error");
 }
 
 - (void)testShowInvalidArgs
 {
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"show",
@@ -162,12 +200,14 @@
 	
 	XCTAssertDefaultMain(SMMainExitInvalidArgs);
 	
+	// Check output.
 	XCTAssertEqual(sout, 0);
 	XCTAssertContainString(*berr, serr, "Error");
 }
 
 - (void)testShowInvalidVM
 {
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"show",
@@ -177,14 +217,17 @@
 	
 	XCTAssertDefaultMain(SMMainExitInvalidVM);
 	
+	// Check output.
 	XCTAssertEqual(sout, 0);
 	XCTAssertContainString(*berr, serr, "Error");
 }
 
 - (void)testShowAll
 {
+	// Generate test vm.
 	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
 	
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"show",
@@ -194,6 +237,7 @@
 	
 	XCTAssertDefaultMain(SMMainExitSuccess);
 
+	// Check output.
 	XCTAssertGreaterThan(sout, 20);
 	XCTAssertContainString(*bout, sout, "VMX");
 	XCTAssertContainString(*bout, sout, "entries");
@@ -215,8 +259,10 @@
 
 - (void)testShowVMX
 {
+	// Generate test vm.
 	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
 	
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"show",
@@ -226,6 +272,7 @@
 	
 	XCTAssertDefaultMain(SMMainExitSuccess);
 	
+	// Check output.
 	XCTAssertContainString(*bout, sout, "VMX");
 	XCTAssertContainString(*bout, sout, "entries");
 	XCTAssertContainString(*bout, sout, ".encoding");
@@ -244,8 +291,10 @@
 
 - (void)testShowNVRAM
 {
+	// Generate test vm.
 	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
 	
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"show",
@@ -255,6 +304,7 @@
 	
 	XCTAssertDefaultMain(SMMainExitSuccess);
 	
+	// Check output.
 	XCTAssertNotContainString(*bout, sout, "VMX");
 	XCTAssertNotContainString(*bout, sout, ".encoding");
 	
@@ -273,8 +323,10 @@
 
 - (void)testShowEFIVariables
 {
+	// Generate test vm.
 	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
 	
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"show",
@@ -284,6 +336,7 @@
 	
 	XCTAssertDefaultMain(SMMainExitSuccess);
 	
+	// Check output.
 	XCTAssertNotContainString(*bout, sout, "VMX");
 	XCTAssertNotContainString(*bout, sout, ".encoding");
 	
@@ -299,8 +352,10 @@
 
 - (void)testShowEFIVariable
 {
+	// Generate test vm.
 	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
 	
+	// Test main.
 	const char *argv[] = {
 		"ut-main",
 		"show",
@@ -311,6 +366,7 @@
 	
 	XCTAssertDefaultMain(SMMainExitSuccess);
 	
+	// Check output.
 	XCTAssertNotContainString(*bout, sout, "VMX");
 	XCTAssertNotContainString(*bout, sout, ".encoding");
 	
@@ -329,7 +385,224 @@
 
 #pragma mark > Change
 
-// FIXME: add  tests.
+- (void)testChangeBootArgs
+{
+	// Generate test vm.
+	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
+
+	// Test main.
+	const char *argv[] = {
+		"ut-main",
+		"change",
+		vmPath.fileSystemRepresentation,
+		"--boot-args",
+		"hello-world"
+	};
+	
+	XCTAssertDefaultMain(SMMainExitSuccess);
+
+	// Check output.
+	XCTAssertEqual(serr, 0);
+
+	// Validate change.
+	SMVMXEntryTest vmxEntries[] = {
+	};
+	
+	SMNVRAMEFIVariableTest nvramVariables[] = {
+		{ .guid = Apple_NVRAM_Variable_Guid, .name = SMEFIAppleNVRAMVarBootArgsName, .value = { 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x2D, 0x77, 0x6F, 0x72, 0x6C, 0x64, 0x00 }, .value_size = 12 }
+	};
+	
+	[self validateChangeOnVMAtPath:vmPath vmxEntries:vmxEntries vmxCount:sizeof(vmxEntries) / sizeof(*vmxEntries) nvramVariables:nvramVariables nvramCount:sizeof(nvramVariables) / sizeof(*nvramVariables)];
+}
+
+- (void)testChangeCSREnableVersion
+{
+	// Generate test vm.
+	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
+
+	// Test main.
+	const char *argv[] = {
+		"ut-main",
+		"change",
+		vmPath.fileSystemRepresentation,
+		"--csr-enable-version",
+		"10.15.0"
+	};
+	
+	XCTAssertDefaultMain(SMMainExitSuccess);
+
+	// Check output.
+	XCTAssertEqual(serr, 0);
+	
+	// Validate change.
+	SMVMXEntryTest vmxEntries[] = {
+	};
+	
+	SMNVRAMEFIVariableTest nvramVariables[] = {
+		{ .guid = Apple_NVRAM_Variable_Guid, .name = SMEFIAppleNVRAMVarCSRActiveConfigName, .value = { 0x10, 0x00, 0x00, 0x00 }, .value_size = 4 }
+	};
+	
+	[self validateChangeOnVMAtPath:vmPath vmxEntries:vmxEntries vmxCount:sizeof(vmxEntries) / sizeof(*vmxEntries) nvramVariables:nvramVariables nvramCount:sizeof(nvramVariables) / sizeof(*nvramVariables)];
+}
+
+- (void)testChangeCSRDisable
+{
+	// Generate test vm.
+	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
+
+	// Test main.
+	const char *argv[] = {
+		"ut-main",
+		"change",
+		vmPath.fileSystemRepresentation,
+		"--csr-disable-version",
+		"10.15.0"
+	};
+	
+	XCTAssertDefaultMain(SMMainExitSuccess);
+
+	// Check output.
+	XCTAssertEqual(serr, 0);
+	
+	// Validate change.
+	SMVMXEntryTest vmxEntries[] = {
+	};
+	
+	SMNVRAMEFIVariableTest nvramVariables[] = {
+		{ .guid = Apple_NVRAM_Variable_Guid, .name = SMEFIAppleNVRAMVarCSRActiveConfigName, .value = { 0x77, 0x00, 0x00, 0x00 }, .value_size = 4 }
+	};
+	
+	[self validateChangeOnVMAtPath:vmPath vmxEntries:vmxEntries vmxCount:sizeof(vmxEntries) / sizeof(*vmxEntries) nvramVariables:nvramVariables nvramCount:sizeof(nvramVariables) / sizeof(*nvramVariables)];
+}
+
+- (void)testChangeCSRFlags
+{
+	// Generate test vm.
+	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
+
+	// Test main.
+	const char *argv[] = {
+		"ut-main",
+		"change",
+		vmPath.fileSystemRepresentation,
+		"--csr-flags",
+		"0x42"
+	};
+	
+	XCTAssertDefaultMain(SMMainExitSuccess);
+
+	// Check output.
+	XCTAssertEqual(serr, 0);
+	
+	// Validate change.
+	SMVMXEntryTest vmxEntries[] = {
+	};
+	
+	SMNVRAMEFIVariableTest nvramVariables[] = {
+		{ .guid = Apple_NVRAM_Variable_Guid, .name = SMEFIAppleNVRAMVarCSRActiveConfigName, .value = { 0x42, 0x00, 0x00, 0x00 }, .value_size = 4 }
+	};
+	
+	[self validateChangeOnVMAtPath:vmPath vmxEntries:vmxEntries vmxCount:sizeof(vmxEntries) / sizeof(*vmxEntries) nvramVariables:nvramVariables nvramCount:sizeof(nvramVariables) / sizeof(*nvramVariables)];
+}
+
+- (void)testChangeMachineUUID
+{
+	// Generate test vm.
+	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
+
+	// Test main.
+	const char *argv[] = {
+		"ut-main",
+		"change",
+		vmPath.fileSystemRepresentation,
+		"--machine-uuid",
+		"EBE8D0F9-994A-4E3D-8D3D-C2C85EF23BC9"
+	};
+	
+	XCTAssertDefaultMain(SMMainExitSuccess);
+
+	// Check output.
+	XCTAssertEqual(serr, 0);
+	
+	// Validate change.
+	SMVMXEntryTest vmxEntries[] = {
+		{ .key = SMVMwareVMXUUIDBiosKey, .value = "eb e8 d0 f9 99 4a 4e 3d-8d 3d c2 c8 5e f2 3b c9" },
+		{ .key = SMVMwareVMXUUIDLocationKey, .value = "eb e8 d0 f9 99 4a 4e 3d-8d 3d c2 c8 5e f2 3b c9" },
+	};
+	
+	SMNVRAMEFIVariableTest nvramVariables[] = {
+		{ .guid = Apple_NVRAM_Variable_Guid, .name = SMEFIAppleNVRAMVarPlatformUUIDName, .value = { 0xEB, 0xE8, 0xD0, 0xF9, 0x99, 0x4A, 0x4E, 0x3D, 0x8D, 0x3D, 0xC2, 0xC8, 0x5E, 0xF2, 0x3B, 0xC9 }, .value_size = 16 }
+	};
+	
+	[self validateChangeOnVMAtPath:vmPath vmxEntries:vmxEntries vmxCount:sizeof(vmxEntries) / sizeof(*vmxEntries) nvramVariables:nvramVariables nvramCount:sizeof(nvramVariables) / sizeof(*nvramVariables)];
+}
+
+- (void)testChangeScreenResolution
+{
+	// Generate test vm.
+	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
+
+	// Test main.
+	const char *argv[] = {
+		"ut-main",
+		"change",
+		vmPath.fileSystemRepresentation,
+		"--screen-resolution",
+		"400x500"
+	};
+	
+	XCTAssertDefaultMain(SMMainExitSuccess);
+
+	// Check output.
+	XCTAssertEqual(serr, 0);
+	
+	// Validate change.
+	SMVMXEntryTest vmxEntries[] = {
+	};
+	
+	SMNVRAMEFIVariableTest nvramVariables[] = {
+		{ .guid = Apple_Screen_Resolution_Guid, .name = SMEFIVarAppleScreenResolutionWidthName, .value = { 0x90, 0x01, 0x00, 0x00 }, .value_size = 4 },
+		{ .guid = Apple_Screen_Resolution_Guid, .name = SMEFIVarAppleScreenResolutionHeightName, .value = { 0xF4, 0x01, 0x00, 0x00 }, .value_size = 4 }
+	};
+	
+	[self validateChangeOnVMAtPath:vmPath vmxEntries:vmxEntries vmxCount:sizeof(vmxEntries) / sizeof(*vmxEntries) nvramVariables:nvramVariables nvramCount:sizeof(nvramVariables) / sizeof(*nvramVariables)];
+}
+
+- (void)testChangeCombined
+{
+	// Generate test vm.
+	NSString *vmPath = [self generateVMwareVMWithResultingVMXFilePath:nil resultingNVRAMFilePath:nil];
+
+	// Test main.
+	const char *argv[] = {
+		"ut-main",
+		"change",
+		vmPath.fileSystemRepresentation,
+		"--machine-uuid",
+		"EBE8D0F9-994A-4E3D-8D3D-C2C85EF23BC9",
+		"--boot-args",
+		"hello-world"
+	};
+	
+	XCTAssertDefaultMain(SMMainExitSuccess);
+
+	// Check output.
+	XCTAssertEqual(serr, 0);
+	
+	// Validate change.
+	SMVMXEntryTest vmxEntries[] = {
+		{ .key = SMVMwareVMXUUIDBiosKey, .value = "eb e8 d0 f9 99 4a 4e 3d-8d 3d c2 c8 5e f2 3b c9" },
+		{ .key = SMVMwareVMXUUIDLocationKey, .value = "eb e8 d0 f9 99 4a 4e 3d-8d 3d c2 c8 5e f2 3b c9" },
+	};
+	
+	SMNVRAMEFIVariableTest nvramVariables[] = {
+		{ .guid = Apple_NVRAM_Variable_Guid, .name = SMEFIAppleNVRAMVarPlatformUUIDName, .value = { 0xEB, 0xE8, 0xD0, 0xF9, 0x99, 0x4A, 0x4E, 0x3D, 0x8D, 0x3D, 0xC2, 0xC8, 0x5E, 0xF2, 0x3B, 0xC9 }, .value_size = 16 },
+		{ .guid = Apple_NVRAM_Variable_Guid, .name = SMEFIAppleNVRAMVarBootArgsName, .value = { 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x2D, 0x77, 0x6F, 0x72, 0x6C, 0x64, 0x00 }, .value_size = 12 }
+	};
+	
+	[self validateChangeOnVMAtPath:vmPath vmxEntries:vmxEntries vmxCount:sizeof(vmxEntries) / sizeof(*vmxEntries) nvramVariables:nvramVariables nvramCount:sizeof(nvramVariables) / sizeof(*nvramVariables)];
+}
+
 
 #pragma mark - Helpers
 
@@ -412,6 +685,48 @@
 	
 	// Return.
 	return vmPath;
+}
+
+- (void)validateChangeOnVMAtPath:vmPath vmxEntries:(const SMVMXEntryTest *)vmxEntries vmxCount:(size_t)vmxCount nvramVariables:(const SMNVRAMEFIVariableTest *)nvramVariables nvramCount:(size_t)nvramCount
+{
+	SMError		*error;
+	NSString	*vmxPath = [vmPath stringByAppendingPathComponent:@"root.vmx"];
+	NSString	*nvramPath = [vmPath stringByAppendingPathComponent:@"root.nvram"];
+	
+	// Check VMX.
+	SMVMwareVMX	*vmx = SMVMwareVMXOpen(vmxPath.fileSystemRepresentation, &error);
+	
+	XCTAssertNotEqual(vmx, NULL);
+	
+	for (size_t i = 0; i < vmxCount; i++)
+	{
+		const SMVMXEntryTest	*test_entry = &vmxEntries[i];
+		SMVMwareVMXEntry		*vmx_entry = SMVMwareVMXGetEntryForKey(vmx, test_entry->key);
+		
+		XCTAssertNotEqual(vmx_entry, NULL);
+		XCTAssertEqual(SMVMwareVMXEntryGetType(vmx_entry), SMVMwareVMXEntryTypeKeyValue);
+		
+		XCTAssertEqualStrings(SMVMwareVMXEntryGetValue(vmx_entry, NULL), test_entry->value);
+	}
+	
+	// Check NVRAM.
+	SMVMwareNVRAM *nvram = SMVMwareNVRAMOpen(nvramPath.fileSystemRepresentation, &error);
+
+	XCTAssertNotEqual(nvram, NULL);
+	
+	for (size_t i = 0; i < nvramCount; i++)
+	{
+		const SMNVRAMEFIVariableTest	*test_variable = &nvramVariables[i];
+		SMVMwareNVRAMEFIVariable		*nvram_variable = SMVMwareNVRAMVariableForGUIDAndName(nvram, &test_variable->guid, test_variable->name, NULL);
+		
+		XCTAssertNotEqual(nvram_variable, NULL);
+		
+		size_t		value_size = SIZE_T_MAX;
+		const char	*value = SMVMwareNVRAMVariableGetValue(nvram_variable, &value_size);
+		
+		XCTAssertEqual(value_size, test_variable->value_size);
+		XCTAssertEqual(memcmp(value, test_variable->value, value_size), 0);
+	}
 }
 
 @end
