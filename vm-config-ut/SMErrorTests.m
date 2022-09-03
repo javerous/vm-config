@@ -24,7 +24,9 @@
 
 #import "SMError.h"
 
-@interface SMErrorTests : XCTestCase
+#import "SMTestCase.h"
+
+@interface SMErrorTests : SMTestCase
 
 @end
 
@@ -45,6 +47,7 @@
 	SMErrorFree(error1);
 	SMErrorFree(error2);
 	SMErrorFree(error3);
+	SMErrorFree(error4);
 }
 
 @end

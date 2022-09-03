@@ -14,6 +14,7 @@
 		E828F1C328A08195008C27DD /* fail-4.vmx in Resources */ = {isa = PBXBuildFile; fileRef = E828F1C228A08194008C27DD /* fail-4.vmx */; };
 		E8296BF6289C31530006DDDB /* SMVMwareVMXTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8296BF5289C31530006DDDB /* SMVMwareVMXTests.m */; };
 		E8296BF8289C319F0006DDDB /* SMBytesWritterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8296BF7289C319F0006DDDB /* SMBytesWritterTests.m */; };
+		E83B09A228C2CD0900E2AF14 /* SMTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = E83B09A128C2CD0900E2AF14 /* SMTestCase.m */; };
 		E8518030289C42AB00B78B58 /* SMVMwareVMXHelper.c in Sources */ = {isa = PBXBuildFile; fileRef = E8B70ED728985F6200903682 /* SMVMwareVMXHelper.c */; };
 		E8518031289C42B400B78B58 /* SMVMwareVMX.c in Sources */ = {isa = PBXBuildFile; fileRef = E887A83228982FED008C59F2 /* SMVMwareVMX.c */; };
 		E873B70A28BC21170089825B /* SMCommandLineOptionsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E873B70928BC21170089825B /* SMCommandLineOptionsTests.m */; };
@@ -73,6 +74,9 @@
 		E8296BEE289C24AE0006DDDB /* SMBytesWritter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMBytesWritter.h; sourceTree = "<group>"; };
 		E8296BF5289C31530006DDDB /* SMVMwareVMXTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMVMwareVMXTests.m; sourceTree = "<group>"; };
 		E8296BF7289C319F0006DDDB /* SMBytesWritterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMBytesWritterTests.m; sourceTree = "<group>"; };
+		E83B09A028C2CD0900E2AF14 /* SMTestCase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMTestCase.h; sourceTree = "<group>"; };
+		E83B09A128C2CD0900E2AF14 /* SMTestCase.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMTestCase.m; sourceTree = "<group>"; };
+		E83B09A328C2CE1600E2AF14 /* PrefixHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		E873B70928BC21170089825B /* SMCommandLineOptionsTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMCommandLineOptionsTests.m; sourceTree = "<group>"; };
 		E87EE65E28A193FE004A8A07 /* SMVMwareNVRAMTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMVMwareNVRAMTests.m; sourceTree = "<group>"; };
 		E883B8DF28BAFBED007370A7 /* SMCommandLineOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMCommandLineOptions.h; sourceTree = "<group>"; };
@@ -179,6 +183,7 @@
 		E8B70EE3289882F100903682 /* vm-config-ut */ = {
 			isa = PBXGroup;
 			children = (
+				E83B09A328C2CE1600E2AF14 /* PrefixHeader.pch */,
 				E8C510B6289F41D1000D8F2E /* tests */,
 				E8C510B7289F41DD000D8F2E /* tools */,
 			);
@@ -262,6 +267,8 @@
 			isa = PBXGroup;
 			children = (
 				E8C510B8289F41FE000D8F2E /* SMTestsTools.h */,
+				E83B09A028C2CD0900E2AF14 /* SMTestCase.h */,
+				E83B09A128C2CD0900E2AF14 /* SMTestCase.m */,
 			);
 			name = tools;
 			sourceTree = "<group>";
@@ -403,6 +410,7 @@
 				E8E621F228B05A9900FF7661 /* SMVMwareNVRAM.c in Sources */,
 				E8F438A628B960EE009782DC /* MainTests.m in Sources */,
 				E8296BF6289C31530006DDDB /* SMVMwareVMXTests.m in Sources */,
+				E83B09A228C2CD0900E2AF14 /* SMTestCase.m in Sources */,
 				E883B8E228BAFBED007370A7 /* SMCommandLineOptions.c in Sources */,
 				E8296BF8289C319F0006DDDB /* SMBytesWritterTests.m in Sources */,
 				E8A23995289AFAD10076A869 /* SMError.c in Sources */,
@@ -434,6 +442,7 @@
 		E8B70EE7289882F100903682 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_PREFIX_HEADER = "vm-config-ut/PrefixHeader.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"PROJ_VERSION=1.0.0",
 					"UNIT_TEST=1",
@@ -455,6 +464,7 @@
 		E8B70EE8289882F100903682 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_PREFIX_HEADER = "vm-config-ut/PrefixHeader.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"PROJ_VERSION=1.0.0",
 					"UNIT_TEST=1",

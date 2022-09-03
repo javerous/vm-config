@@ -24,13 +24,15 @@
 
 #import "SMBytesWritter.h"
 
+#import "SMTestCase.h"
+
 
 /*
 ** SMBytesWritterTests
 */
 #pragma mark - SMBytesWritterTests
 
-@interface SMBytesWritterTests : XCTestCase
+@interface SMBytesWritterTests : SMTestCase
 
 @end
 
@@ -92,6 +94,9 @@
 	//
 	XCTAssertEqual(SMBytesWritterSize(&writer), ref.length);
 	XCTAssertEqual(memcmp(SMBytesWritterPtr(&writer), ref.bytes, ref.length), 0);
+	
+	// Clean.
+	SMBytesWritterFree(&writer);
 }
 
 @end

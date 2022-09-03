@@ -26,6 +26,7 @@
 #import "SMVMwareNVRAMHelper.h"
 
 #import "SMTestsTools.h"
+#import "SMTestCase.h"
 
 
 /*
@@ -46,7 +47,7 @@ typedef NS_ENUM(NSUInteger, SMModificationPhase)
 */
 #pragma mark - SMVMwareNVRAMTests
 
-@interface SMVMwareNVRAMTests : XCTestCase
+@interface SMVMwareNVRAMTests : SMTestCase
 
 @end
 
@@ -56,6 +57,8 @@ typedef NS_ENUM(NSUInteger, SMModificationPhase)
 
 - (void)setUp
 {
+	[super setUp];
+	
 	self.continueAfterFailure = NO;
 }
 
@@ -169,13 +172,11 @@ typedef NS_ENUM(NSUInteger, SMModificationPhase)
 	SMError			*error = NULL;
 	SMVMwareNVRAM	*nvram = [self nvramForFile:@"fail-1" error:&error];
 	
-	XCTAssertEqual(nvram, NULL, "succeeded in parsing an invalid nvram");
-	
-	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
-	
-	_onExit {
-		SMVMwareNVRAMFree(nvram);
-	};
+	XCTAssertEqual(nvram, NULL, "succeeded in parsing an invalid nvram (%s)", SMErrorGetUserInfo(error));
+		
+	// Clean.
+	SMVMwareNVRAMFree(nvram);
+	SMErrorFree(error);
 }
 
 - (void)testFail2Parsing
@@ -184,13 +185,11 @@ typedef NS_ENUM(NSUInteger, SMModificationPhase)
 	SMError			*error = NULL;
 	SMVMwareNVRAM	*nvram = [self nvramForFile:@"fail-2" error:&error];
 
-	XCTAssertEqual(nvram, NULL, "succeeded in parsing an invalid nvram");
+	XCTAssertEqual(nvram, NULL, "succeeded in parsing an invalid nvram (%s)", SMErrorGetUserInfo(error));
 
-	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
-
-	_onExit {
-		SMVMwareNVRAMFree(nvram);
-	};
+	// Clean.
+	SMVMwareNVRAMFree(nvram);
+	SMErrorFree(error);
 }
 
 - (void)testFail3Parsing
@@ -199,13 +198,11 @@ typedef NS_ENUM(NSUInteger, SMModificationPhase)
 	SMError			*error = NULL;
 	SMVMwareNVRAM	*nvram = [self nvramForFile:@"fail-3" error:&error];
 
-	XCTAssertEqual(nvram, NULL, "succeeded in parsing an invalid nvram");
+	XCTAssertEqual(nvram, NULL, "succeeded in parsing an invalid nvram (%s)", SMErrorGetUserInfo(error));
 
-	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
-
-	_onExit {
-		SMVMwareNVRAMFree(nvram);
-	};
+	// Clean.
+	SMVMwareNVRAMFree(nvram);
+	SMErrorFree(error);
 }
 
 - (void)testFail4Parsing
@@ -214,13 +211,11 @@ typedef NS_ENUM(NSUInteger, SMModificationPhase)
 	SMError			*error = NULL;
 	SMVMwareNVRAM	*nvram = [self nvramForFile:@"fail-4" error:&error];
 
-	XCTAssertEqual(nvram, NULL, "succeeded in parsing an invalid nvram");
+	XCTAssertEqual(nvram, NULL, "succeeded in parsing an invalid nvram (%s)", SMErrorGetUserInfo(error));
 
-	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
-
-	_onExit {
-		SMVMwareNVRAMFree(nvram);
-	};
+	// Clean.
+	SMVMwareNVRAMFree(nvram);
+	SMErrorFree(error);
 }
 
 - (void)testParserStability
@@ -231,9 +226,8 @@ typedef NS_ENUM(NSUInteger, SMModificationPhase)
 
 	XCTAssert(nvram, @"failed to parse file: %s", SMErrorGetUserInfo(error));
 	
-	_onExit {
-		SMVMwareNVRAMFree(nvram);
-	};
+	SMErrorFree(error);
+	error = NULL;
 	
 	// Write parsed file.
 	NSString *tempOutput = SMGenerateTemporaryTestPath();
@@ -251,6 +245,10 @@ typedef NS_ENUM(NSUInteger, SMModificationPhase)
 	XCTAssertNotNil(writtenData);
 	
 	XCTAssertEqualObjects(refData, writtenData);
+	
+	// Clean.
+	SMVMwareNVRAMFree(nvram);
+	SMErrorFree(error);
 }
 
 - (void)testModificationsBootArgs
@@ -520,48 +518,65 @@ typedef NS_ENUM(NSUInteger, SMModificationPhase)
 	
 	XCTAssert(nvramOriginal, @"failed to parse file: %s", SMErrorGetUserInfo(error));
 	
-	_onExit {
-		SMVMwareNVRAMFree(nvramOriginal);
-	};
+	SMErrorFree(error);
+	error = NULL;
+	
 	
 	// Modify.
 	block(SMModificationPhaseOriginal, nvramOriginal);
+	
 	
 	// Write modified file 1.
 	NSString *modifiedFile1 = SMGenerateTemporaryTestPath();
 	
 	XCTAssertTrue(SMVMwareNVRAMWriteToFile(nvramOriginal, modifiedFile1.fileSystemRepresentation, &error), "failed to write file 1: %s", SMErrorGetUserInfo(error));
 	
+	SMVMwareNVRAMFree(nvramOriginal);
+	nvramOriginal = NULL;
+	
+	SMErrorFree(error);
+	error = NULL;
+	
+	
 	// Open modified file1.
 	SMVMwareNVRAM *nvramReopen1 = SMVMwareNVRAMOpen(modifiedFile1.fileSystemRepresentation, &error);
 	
 	XCTAssertNotEqual(nvramReopen1, NULL, "failed to re-open modified file 1: %s", SMErrorGetUserInfo(error));
 	
-	_onExit {
-		SMVMwareNVRAMFree(nvramReopen1);
-		[[NSFileManager defaultManager] removeItemAtPath:modifiedFile1 error:nil];
-	};
+	SMErrorFree(error);
+	error = NULL;
+	
 	
 	// Validate modified.
 	block(SMModificationPhaseReopen1, nvramReopen1);
+	
 	
 	// Write modified file 2.
 	NSString *modifiedFile2 = SMGenerateTemporaryTestPath();
 	
 	XCTAssertTrue(SMVMwareNVRAMWriteToFile(nvramReopen1, modifiedFile2.fileSystemRepresentation, &error), "failed to write file 2: %s", SMErrorGetUserInfo(error));
 	
+	SMVMwareNVRAMFree(nvramReopen1);
+	nvramReopen1 = NULL;
+	
+	SMErrorFree(error);
+	error = NULL;
+	
+	[[NSFileManager defaultManager] removeItemAtPath:modifiedFile1 error:nil];
+	
+	
 	// Open modified file2.
 	SMVMwareNVRAM *nvramReopen2 = SMVMwareNVRAMOpen(modifiedFile2.fileSystemRepresentation, &error);
 	
 	XCTAssertNotEqual(nvramReopen2, NULL, "failed to re-open modified file 2: %s", SMErrorGetUserInfo(error));
 	
-	_onExit {
-		SMVMwareNVRAMFree(nvramReopen2);
-		[[NSFileManager defaultManager] removeItemAtPath:modifiedFile2 error:nil];
-	};
-	
+	SMErrorFree(error);
+	error = NULL;
 	
 	block(SMModificationPhaseReopen2, nvramReopen2);
+	
+	SMVMwareNVRAMFree(nvramReopen2);
+	[[NSFileManager defaultManager] removeItemAtPath:modifiedFile2 error:nil];
 }
 
 @end
