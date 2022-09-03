@@ -27,6 +27,7 @@
 #import "main.h"
 
 #import "SMTestsTools.h"
+#import "SMTestCase.h"
 
 #import "SMVMwareVMX.h"
 #import "SMVMwareVMXHelper.h"
@@ -41,8 +42,6 @@
 ** Defines
 */
 #pragma mark - Defines
-
-#define CHECK_LEAKS 0
 
 #define XCTAssertDefaultMain(ExpectedExit) 															\
 	SMDeclareDefaultFiles;																			\
@@ -73,14 +72,12 @@ typedef struct
 } SMNVRAMEFIVariableTest;
 
 
-
-
 /*
 ** MainTests
 */
 #pragma mark - MainTests
 
-@interface MainTests : XCTestCase
+@interface MainTests : SMTestCase
 {
 	NSString *_testDirectory;
 }
@@ -93,6 +90,8 @@ typedef struct
 
 - (void)setUp
 {
+	[super setUp];
+	
 	NSString *tempDirectory = [NSString stringWithFormat:@"%@-vm-config-ut", [NSUUID UUID].UUIDString];
 	
 	_testDirectory = [NSTemporaryDirectory() stringByAppendingPathComponent:tempDirectory];
@@ -104,18 +103,7 @@ typedef struct
 
 - (void)tearDown
 {
-#if defined(CHECK_LEAKS) && CHECK_LEAKS
-	NSTask *task = [[NSTask alloc] init];
-	
-	task.executableURL = [NSURL fileURLWithPath:@"/usr/bin/leaks"];
-	task.arguments = @[ [@(getpid()) stringValue] ];
-	
-	[task launch];
-	[task waitUntilExit];
-	
-	if (task.terminationReason == NSTaskTerminationReasonExit && task.terminationStatus != 0)
-		XCTFail(@"Found a leaks");
-#endif
+	[super tearDown];
 	
 	[[NSFileManager defaultManager] removeItemAtPath:_testDirectory error:nil];
 }

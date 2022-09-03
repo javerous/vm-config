@@ -26,6 +26,7 @@
 #import "SMVMwareVMXHelper.h"
 
 #import "SMTestsTools.h"
+#import "SMTestCase.h"
 
 
 /*
@@ -46,7 +47,7 @@ typedef struct
 */
 #pragma mark - SMVMwareVMXTests
 
-@interface SMVMwareVMXTests : XCTestCase
+@interface SMVMwareVMXTests : SMTestCase
 
 @end
 
@@ -56,6 +57,8 @@ typedef struct
 
 - (void)setUp
 {
+	[super setUp];
+	
 	self.continueAfterFailure = NO;
 }
 
@@ -142,13 +145,11 @@ typedef struct
 	SMError		*error = NULL;
 	SMVMwareVMX *vmx = [self vmxForFile:@"fail-1" error:&error];
 	
-	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx");
-	
-	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
-	
-	_onExit {
-		SMVMwareVMXFree(vmx);
-	};
+	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx (%s)", SMErrorGetUserInfo(error));
+		
+	// Clean.
+	SMVMwareVMXFree(vmx);
+	SMErrorFree(error);
 }
 
 - (void)testFail2Parsing
@@ -157,13 +158,11 @@ typedef struct
 	SMError		*error = NULL;
 	SMVMwareVMX *vmx = [self vmxForFile:@"fail-2" error:&error];
 	
-	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx");
-	
-	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
-	
-	_onExit {
-		SMVMwareVMXFree(vmx);
-	};
+	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx (%s)", SMErrorGetUserInfo(error));
+		
+	// Clean.
+	SMVMwareVMXFree(vmx);
+	SMErrorFree(error);
 }
 
 - (void)testFail3Parsing
@@ -172,13 +171,11 @@ typedef struct
 	SMError		*error = NULL;
 	SMVMwareVMX *vmx = [self vmxForFile:@"fail-3" error:&error];
 	
-	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx");
-	
-	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
-	
-	_onExit {
-		SMVMwareVMXFree(vmx);
-	};
+	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx (%s)", SMErrorGetUserInfo(error));
+		
+	// Clean.
+	SMVMwareVMXFree(vmx);
+	SMErrorFree(error);
 }
 
 - (void)testFail4Parsing
@@ -187,13 +184,11 @@ typedef struct
 	SMError		*error = NULL;
 	SMVMwareVMX *vmx = [self vmxForFile:@"fail-4" error:&error];
 	
-	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx");
-	
-	NSLog(@"Result error: '%s'.\n", SMErrorGetUserInfo(error));
-	
-	_onExit {
-		SMVMwareVMXFree(vmx);
-	};
+	XCTAssertEqual(vmx, NULL, "succeeded in parsing an invalid vmx (%s)", SMErrorGetUserInfo(error));
+		
+	// Clean.
+	SMVMwareVMXFree(vmx);
+	SMErrorFree(error);
 }
 
 - (void)testParserStability
@@ -204,9 +199,8 @@ typedef struct
 	
 	XCTAssert(vmx, @"failed to parse file: %s", SMErrorGetUserInfo(error));
 	
-	_onExit {
-		SMVMwareVMXFree(vmx);
-	};
+	SMErrorFree(error);
+	error = NULL;
 	
 	// Write parsed file.
 	NSString *tempOutput = SMGenerateTemporaryTestPath();
@@ -224,6 +218,10 @@ typedef struct
 	XCTAssertNotNil(writtenData);
 	
 	XCTAssertEqualObjects(refData, writtenData);
+	
+	// Clean.
+	SMVMwareVMXFree(vmx);
+	SMErrorFree(error);
 }
 
 - (void)testModifications
@@ -235,9 +233,8 @@ typedef struct
 	
 	XCTAssert(vmxOriginal, @"failed to parse file: %s", SMErrorGetUserInfo(error));
 	
-	_onExit {
-		SMVMwareVMXFree(vmxOriginal);
-	};
+	SMErrorFree(error);
+	error = NULL;
 	
 	// Fetch entries.
 	SMVMwareVMXEntry *entry1 = SMVMwareVMXGetEntryForKey(vmxOriginal, ".encoding");
@@ -270,15 +267,13 @@ typedef struct
 	
 	XCTAssertTrue(SMVMwareVMXWriteToFile(vmxOriginal, modifiedFile.fileSystemRepresentation, &error), "failed to write file: %s", SMErrorGetUserInfo(error));
 	
+	SMVMwareVMXFree(vmxOriginal);
+	vmxOriginal = NULL;
+	
 	// Open modified file.
 	SMVMwareVMX *vmxReopen = SMVMwareVMXOpen(modifiedFile.fileSystemRepresentation, &error);
 	
 	XCTAssertNotEqual(vmxReopen, NULL, "failed to re-open modified file: %s", SMErrorGetUserInfo(error));
-	
-	_onExit {
-		SMVMwareVMXFree(vmxReopen);
-		[[NSFileManager defaultManager] removeItemAtPath:modifiedFile error:nil];
-	};
 	
 	// Validate content
 	SMVMXEntryTest testEntries[] = {
@@ -295,6 +290,12 @@ typedef struct
 	};
 	
 	[self validateEntriesOfVMX:vmxReopen withTestEntries:testEntries count:sizeof(testEntries) / sizeof(*testEntries)];
+	
+	// Clean.
+	SMVMwareVMXFree(vmxReopen);
+	SMErrorFree(error);
+	
+	[[NSFileManager defaultManager] removeItemAtPath:modifiedFile error:nil];
 }
 
 - (void)testMacOSVersion1
@@ -306,14 +307,14 @@ typedef struct
 	
 	XCTAssert(vmx, @"failed to parse file: %s", SMErrorGetUserInfo(error));
 	
-	_onExit {
-		SMVMwareVMXFree(vmx);
-	};
-	
 	SMVersion version = SMVMwareVMXExtractMacOSVersion(vmx);
 	SMVersion version_ref = SMVersionFromComponents(10, 15, 0);
 	
 	XCTAssertTrue(SMVersionIsEqual(version, version_ref));
+	
+	// Clean.
+	SMVMwareVMXFree(vmx);
+	SMErrorFree(error);
 }
 
 - (void)testMacOSVersion2
@@ -325,14 +326,14 @@ typedef struct
 	
 	XCTAssert(vmx, @"failed to parse file: %s", SMErrorGetUserInfo(error));
 	
-	_onExit {
-		SMVMwareVMXFree(vmx);
-	};
-	
 	SMVersion version = SMVMwareVMXExtractMacOSVersion(vmx);
 	SMVersion version_ref = SMVersionFromComponents(10, 15, 7);
 	
 	XCTAssertTrue(SMVersionIsEqual(version, version_ref));
+	
+	// Clean.
+	SMVMwareVMXFree(vmx);
+	SMErrorFree(error);
 }
 
 - (void)testSetMachineUUID
@@ -344,10 +345,9 @@ typedef struct
 	
 	XCTAssert(vmxOriginal, @"failed to parse file: %s", SMErrorGetUserInfo(error));
 	
-	_onExit {
-		SMVMwareVMXFree(vmxOriginal);
-	};
-	
+	SMErrorFree(error);
+	error = NULL;
+
 	// Modify content.
 	uuid_t uuid1 = { 0xC8, 0x62, 0xD7, 0x75, 0x62, 0x3D, 0x42, 0x99, 0x82, 0x77, 0x96, 0xA6, 0x4A, 0x69, 0x6F, 0xD5 };
 	const char *uuidStr1 = "c8 62 d7 75 62 3d 42 99-82 77 96 a6 4a 69 6f d5";
@@ -367,15 +367,13 @@ typedef struct
 	
 	XCTAssertTrue(SMVMwareVMXWriteToFile(vmxOriginal, modifiedFile.fileSystemRepresentation, &error), "failed to write file: %s", SMErrorGetUserInfo(error));
 	
+	SMVMwareVMXFree(vmxOriginal);
+	vmxOriginal = NULL;
+	
 	// Open modified file.
 	SMVMwareVMX *vmxReopen = SMVMwareVMXOpen(modifiedFile.fileSystemRepresentation, &error);
 	
 	XCTAssertNotEqual(vmxReopen, NULL, "failed to re-open modified file: %s", SMErrorGetUserInfo(error));
-	
-	_onExit {
-		SMVMwareVMXFree(vmxReopen);
-		[[NSFileManager defaultManager] removeItemAtPath:modifiedFile error:nil];
-	};
 	
 	// Validate re-open.
 	[self validateEntriesOfVMX:vmxReopen withTestEntries:testEntries1 count:sizeof(testEntries1) / sizeof(*testEntries1)];
@@ -392,6 +390,12 @@ typedef struct
 	XCTAssertTrue(SMVMwareVMXSetMachineUUID(vmxReopen, uuid2, NULL));
 	
 	[self validateEntriesOfVMX:vmxReopen withTestEntries:testEntries2 count:sizeof(testEntries2) / sizeof(*testEntries2)];
+	
+	// Clean.
+	SMVMwareVMXFree(vmxReopen);
+	SMErrorFree(error);
+	
+	[[NSFileManager defaultManager] removeItemAtPath:modifiedFile error:nil];
 }
 
 - (void)testDetailedDataParsing

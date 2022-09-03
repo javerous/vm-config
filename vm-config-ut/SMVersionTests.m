@@ -24,13 +24,15 @@
 
 #import "SMVersion.h"
 
+#import "SMTestCase.h"
+
 
 /*
 ** SMVersionTests
 */
 #pragma mark - SMVersionTests
 
-@interface SMVersionTests : XCTestCase
+@interface SMVersionTests : SMTestCase
 
 @end
 

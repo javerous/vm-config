@@ -85,6 +85,7 @@ static __attribute__((always_inline)) inline
 void SMBytesWritterFree(SMBytesWritter *writter)
 {
 	free(writter->bytes);
+	writter->bytes = NULL;
 }
 
 

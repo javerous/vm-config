@@ -25,6 +25,7 @@
 #import "SMStringHelper.h"
 
 #import "SMTestsTools.h"
+#import "SMTestCase.h"
 
 
 /*
@@ -32,7 +33,7 @@
 */
 #pragma mark - SMStringHelperTests
 
-@interface SMStringHelperTests : XCTestCase
+@interface SMStringHelperTests : SMTestCase
 
 @end
 
