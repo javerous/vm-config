@@ -11,6 +11,7 @@ vm-config is a command line to show or change some VMware Fusion virtual machine
 
 - **Build on macOS or Linux**
   ```
+  $ cd vm-config
   $ mkdir build
   $ cd build
   $ cmake ../
