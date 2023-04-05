@@ -48,6 +48,7 @@ vm-config is a command line to show or change some VMware Fusion virtual machine
 - Change the UUID of the machine
   ```
   vm-config change my_vm.vmwarevm --machine-uuid 6E1881A7-41BF-4363-9419-6F0340DD6AE2
+  vm-config change my_vm.vmwarevm --machine-uuid `uuidgen`
   ```
 
 - Change the boot-args of the machine
