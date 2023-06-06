@@ -154,7 +154,7 @@ bool SMVMwareNVRAMSetAppleCSRActivation(SMVMwareNVRAM *nvram, SMVersion macos_ve
 		},
 		{
 			.min_version = SMVersionFromComponents(10, 16, 0),
-			.max_version = SMVersionFromComponents(13, 99, 99),
+			.max_version = SMVersionFromComponents(14, 99, 99),
 			.csr_getter = csr_version_4
 		},
 	};
